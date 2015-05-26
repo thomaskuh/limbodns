@@ -1,0 +1,27 @@
+<configuration>
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%date %-5level %logger - %msg%n</pattern>
+			<!-- <pattern>%date [%-18thread] %-5level %logger - %msg%n</pattern>  -->
+		</encoder>
+	</appender>
+	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+		<file>${execdir}/limbodns.log</file>
+		<encoder>
+			<pattern>%date %-5level %logger - %msg%n</pattern>
+		</encoder>
+	</appender>	
+	
+	
+	<logger name="org.eclipse.jetty" level="warn" additivity="false">
+	    <appender-ref ref="STDOUT" />
+	    <appender-ref ref="FILE" />
+	</logger>
+	
+	<root level="debug">
+		<appender-ref ref="STDOUT" />
+	    <appender-ref ref="FILE" />
+	</root>
+
+</configuration>
