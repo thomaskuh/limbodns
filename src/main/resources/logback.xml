@@ -7,7 +7,7 @@
 		</encoder>
 	</appender>
 	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
-		<file>${execdir}/limbodns.log</file>
+		<file>${datadir}/limbodns.log</file>
 		<encoder>
 			<pattern>%date %-5level %logger - %msg%n</pattern>
 		</encoder>

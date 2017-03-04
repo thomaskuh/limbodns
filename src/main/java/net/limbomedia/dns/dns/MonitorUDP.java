@@ -24,7 +24,9 @@ public class MonitorUDP extends Monitor {
 		try {
 			socket = new DatagramSocket(port);
 		} catch (IOException e) {
-			throw new RuntimeException("Error opening UDP socket on port " + port + ". " + e.getMessage(),e);
+			String msg = "Error opening UDP socket on port " + port + ". " + e.getMessage();
+			LOG.error(msg,e);
+			throw new RuntimeException(msg,e);
 		}
 		
 		this.start();

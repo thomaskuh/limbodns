@@ -9,6 +9,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 import net.limbomedia.dns.dns.DNServer;
 import net.limbomedia.dns.dns.Resolver;
 import net.limbomedia.dns.dns.ResolverImpl;
@@ -18,19 +24,14 @@ import net.limbomedia.dns.model.XType;
 import net.limbomedia.dns.model.XZone;
 import net.limbomedia.dns.web.WebServer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
 public class Starter {
 	
 	private Logger L = LoggerFactory.getLogger(Starter.class);
 	
-	private static final String VERSION = "1.0";
+	private static final String VERSION = "2";
 	
-	public static File dirExecution;
+	public static final String SYSPROP_DIR = "dir";
+	public static File datadir;
 	public static File fileConfig;
 	public static File fileZones;
 	
@@ -41,16 +42,33 @@ public class Starter {
 	private WebServer webServer;
 	
 	public static void main(String[] args) {
-		dirExecution = Starter.retrieveExecutionDir();
-		System.setProperty("execdir", dirExecution.getAbsolutePath());
+		String property = System.getProperty(SYSPROP_DIR);
+		if(property == null || property.isEmpty()) {
+			datadir = Starter.retrieveExecutionDir();
+		}
+		else {
+			datadir = new File(property);
+			if(!datadir.exists()) {
+				System.err.println("Specified data directory doesn't exist: " + property);
+				System.exit(-1);
+			}
+			if(!datadir.isDirectory()) {
+				System.err.println("Specified data directory is not a directory: " + property);
+				System.exit(-1);
+			}
+		}
+		
+		System.setProperty("datadir", datadir.getAbsolutePath());
 		new Starter();
 	}
 	
 	public Starter() {
-		L.info("Starting LimboDNS " + VERSION + ", ExecDirectory: " + dirExecution.getAbsolutePath());
+		L.info("Starting LimboDNS {}", VERSION);
+		L.info("Data directory: {}", datadir.getAbsolutePath());
 		
-		fileConfig = new File(dirExecution, "config.json");
-		fileZones = new File(dirExecution, "zones.json");
+		
+		fileConfig = new File(datadir, "config.json");
+		fileZones = new File(datadir, "zones.json");
 		
 		try {
 			checkConfigFile();
