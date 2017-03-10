@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.limbomedia</groupId>
 	<artifactId>limbodns</artifactId>
-	<version>2.0</version>
+	<version>3.0</version>
 
 	<properties>
 		<version.org.slf4j>1.7.7</version.org.slf4j>

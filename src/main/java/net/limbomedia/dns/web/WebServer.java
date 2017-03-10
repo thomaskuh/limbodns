@@ -7,9 +7,6 @@ import java.util.Map;
 
 import javax.security.auth.Subject;
 
-import net.limbomedia.dns.ZoneManager;
-import net.limbomedia.dns.model.Config;
-
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.DefaultUserIdentity;
@@ -32,6 +29,9 @@ import org.eclipse.jetty.util.security.Password;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.limbomedia.dns.ZoneManager;
+import net.limbomedia.dns.model.Config;
+
 public class WebServer {
 	
 	private static final Logger L = LoggerFactory.getLogger(WebServer.class);
@@ -53,7 +53,7 @@ public class WebServer {
         ServletContextHandler ctxServlet = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
         ctxServlet.setContextPath("/");
         ctxServlet.addServlet(new ServletHolder(new GuiServlet(zoneManager)),"/api/*");
-        ctxServlet.addServlet(new ServletHolder(new UpdateServlet(zoneManager)),"/update/*");
+        ctxServlet.addServlet(new ServletHolder(new UpdateServlet(config,zoneManager)),"/update/*");
         
         HandlerCollection handlers = new HandlerCollection();
         handlers.addHandler(ctxHandler);

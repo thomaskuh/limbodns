@@ -8,10 +8,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.limbomedia.dns.ZoneManager;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import net.limbomedia.dns.ZoneManager;
+import net.limbomedia.dns.model.Config;
 
 public class UpdateServlet extends HttpServlet {
 	
@@ -20,8 +21,10 @@ public class UpdateServlet extends HttpServlet {
 	private static final long serialVersionUID = -6612011519927117470L;
 	
 	private ZoneManager zoneManager;
+	private Config config;
 	
-	public UpdateServlet(ZoneManager zoneManager) {
+	public UpdateServlet(Config config, ZoneManager zoneManager) {
+		this.config = config;
 		this.zoneManager = zoneManager;
 	}
 	
@@ -39,10 +42,28 @@ public class UpdateServlet extends HttpServlet {
 		String[] split = req.getPathInfo().split("/");
 		int parts = split.length;
 		
+		// Get remote address from request or header (reverse proxy configuration)
+		String remoteAddress = null;
+		
+		if(config.getRemoteAddressHeader() != null && !config.getRemoteAddressHeader().isEmpty()) {
+			String addrHeader = req.getHeader(config.getRemoteAddressHeader());
+			if(addrHeader != null) {
+				// multiple proxies may concat "client, proxy1, proxy2, proxy3, ...";
+				String[] split2 = addrHeader.split(",");
+				remoteAddress = split2[0].trim();
+			}
+		}
+		
+		// Fallback to classic remote address
+		if(remoteAddress == null || remoteAddress.isEmpty()) {
+			remoteAddress = req.getRemoteAddr();
+		}
+		
+		
 		String value = null;
 		if(parts == 2) {
 			// Detect IP
-			value = req.getRemoteAddr();
+			value = remoteAddress;
 		}
 		else if (parts == 3) {
 			// Use submitted IP

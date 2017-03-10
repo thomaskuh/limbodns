@@ -10,6 +10,8 @@ public class Config implements Serializable {
 	private int portTCP = 53;
 	private int portHTTP = 7777;
 	
+	private String remoteAddressHeader = "";
+	
 	private String password = "admin";
 	
 	public int getPortUDP() {
@@ -35,6 +37,12 @@ public class Config implements Serializable {
 	}
 	public void setPassword(String password) {
 		this.password = password;
+	}
+	public String getRemoteAddressHeader() {
+		return remoteAddressHeader;
+	}
+	public void setRemoteAddressHeader(String remoteAddressHeader) {
+		this.remoteAddressHeader = remoteAddressHeader;
 	}
 	
 	

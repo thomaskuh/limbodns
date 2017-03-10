@@ -28,8 +28,6 @@ public class Starter {
 	
 	private Logger L = LoggerFactory.getLogger(Starter.class);
 	
-	private static final String VERSION = "2";
-	
 	public static final String SYSPROP_DIR = "dir";
 	public static File datadir;
 	public static File fileConfig;
@@ -63,7 +61,7 @@ public class Starter {
 	}
 	
 	public Starter() {
-		L.info("Starting LimboDNS {}", VERSION);
+		L.info("Starting LimboDNS...");
 		L.info("Data directory: {}", datadir.getAbsolutePath());
 		
 		
