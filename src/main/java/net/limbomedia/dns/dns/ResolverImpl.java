@@ -67,7 +67,7 @@ public class ResolverImpl implements Resolver {
 	}
 
 	private Zone findBestZone(Name name) {
-		Zone foundzone = zoneProvider.getZone(name);
+		Zone foundzone = zoneProvider.zoneGet(name);
 
 		if (foundzone != null) {
 			return foundzone;
@@ -78,7 +78,7 @@ public class ResolverImpl implements Resolver {
 		for (int i = 1; i < labels; i++) {
 
 			Name tname = new Name(name, i);
-			foundzone = zoneProvider.getZone(tname);
+			foundzone = zoneProvider.zoneGet(tname);
 
 			if (foundzone != null) {
 				return foundzone;

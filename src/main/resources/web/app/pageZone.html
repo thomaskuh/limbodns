@@ -1,0 +1,71 @@
+<h1 class="title">{{'ZONE.TITLE'|translate}}<a class="is-pulled-right " href="#/home"><i class="fas fa-arrow-circle-left"></i>Back</a></h1>
+<h2 class="subtitle">{{$ctrl.zone.name}}</h2>
+
+<table class="table is-fullwidth is-striped tk-table-actions tk-table-middle">
+  <thead>
+    <tr>
+      <th>{{'ZONE.RR_NAME'|translate}}</th>
+      <th>{{'ZONE.RR_TYPE'|translate}}</th>
+      <th>{{'ZONE.RR_DATE'|translate}}</th>
+      <th>{{'ZONE.RR_TOKEN'|translate}}</th>
+      <th>{{'ZONE.RR_VALUE'|translate}}</th>
+      <th>
+        <button ng-click="$ctrl.reload()" class="button"><i class="fas fa-sync">&nbsp;</i>{{'GEN.RELOAD'|translate}}</button>
+      </th>
+    </tr>
+  </thead>
+  
+  <tr>
+    <td>{{$ctrl.zone.name}}</td>
+    <td>NS</td>
+    <td></td>
+    <td></td>
+    <td><input type="text" class="input" value="{{$ctrl.zone.nameserver}}" disabled="disabled" /></td>
+    <td>{{'GEN.GENERATED'|translate}}</td>
+  </tr>
+  <tr>
+    <td>{{$ctrl.zone.name}}</td>
+    <td>SOA</td>
+    <td></td>
+    <td></td>
+    <td><input type="text" class="input" value="{{$ctrl.zone.nameserver}} {{'hostmaster.' + $ctrl.zone.nameserver}} {{$ctrl.zone.serial}} 21600 7200 2160000 3600" disabled="disabled" /></td>
+    <td>{{'GEN.GENERATED'|translate}}</td>
+  </tr>
+        
+  <tr ng-repeat="rec in $ctrl.zone.records | orderBy:'name'" ng-class="{'has-background-warning': rec.dirty}">
+    <td>{{rec.name}}</td>
+    <td>{{rec.type}}</td>
+    <td>
+      {{rec.lastChange | date:'yyyy-MM-dd HH:mm:ss'}}<br/>
+      <small ng-if="!rec.lastUpdate">N/A</small>
+      <small ng-if="rec.lastUpdate">{{rec.lastUpdate | date:'yyyy-MM-dd HH:mm:ss'}}</small>
+    </td>
+    <td>
+      <div ng-if="rec.type == 'A' || rec.type == 'AAAA'" class="field has-addons">
+        <div class="control is-expanded"><input type="text" class="input" ng-model="rec.token" ng-change="rec.dirty = true" /></div>
+        <div class="control"><button ng-click="$ctrl.generateToken(rec)" class="button" title="{{'ZONE.TOKENGEN'|translate}}"><i class="fas fa-magic"></i></button></div>
+      </div>
+    </td>
+    <td><input type="text" class="input" ng-model="rec.value" ng-change="rec.dirty = true" /></td>
+    <td>
+      <a ng-if="!rec.dirty && (rec.type == 'A' || rec.type == 'AAAA')" href="#/zone/{{$ctrl.zone.name}}/{{rec.id}}" class="button is-link" title="{{'RECORD.TITLE'|translate}}"><i class="fas fa-info"></i></a>    
+      <button ng-if="rec.dirty"  ng-click="$ctrl.recordUndo(rec)" class="button"><i class="fas fa-undo">&nbsp;</i>{{'GEN.UNDO'|translate}}</button>
+      <button ng-if="rec.dirty"  ng-click="$ctrl.recordSave(rec)" class="button is-success"><i class="fas fa-save">&nbsp;</i>{{'GEN.SAVE'|translate}}</button>
+      <button ng-if="!rec.dirty" ng-click="$ctrl.recordDelete(rec)" class="button is-danger"><i class="fas fa-trash">&nbsp;</i>{{'GEN.DELETE'|translate}}</button>
+    </td>
+  </tr>
+  <tr>
+    <td><input type="text" class="input" ng-model="$ctrl.recordNew.name"></td>
+    <td><div class="select"><select ng-model="$ctrl.recordNew.type" ng-options="type for type in $ctrl.types" ng-change="$ctrl.recordNewChanged()"></select></div></td>
+    <td></td>
+    <td>
+      <div ng-if="$ctrl.recordNew.type == 'A' || $ctrl.recordNew.type == 'AAAA'" class="field has-addons">
+        <div class="control is-expanded"><input type="text" class="input" ng-model="$ctrl.recordNew.token" ng-change="rec.dirty = true" /></div>
+        <div class="control"><button ng-click="$ctrl.generateToken($ctrl.recordNew)" class="button" title="{{'ZONE.TOKENGEN'|translate}}"><i class="fas fa-magic"></i></button></div>
+      </div>
+    </td>
+    <td><input type="text" class="input" ng-model="$ctrl.recordNew.value"></td>
+    <td><button ng-click="$ctrl.recordCreate()" class="button is-success"><i class="fas fa-plus">&nbsp;</i>{{'GEN.CREATE'|translate}}</button></td>
+  </tr>
+</table>
+

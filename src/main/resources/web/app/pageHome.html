@@ -1,0 +1,46 @@
+<h1 class="title">{{'HOME.TITLE'|translate}}</h1>
+<h2 class="subtitle">{{'HOME.SUBTITLE'|translate}}</h2>
+
+<table class="table is-fullwidth is-striped tk-table-actions tk-table-middle">
+  <thead>
+    <tr>
+      <th>{{'HOME.ZONE'|translate}}</th>
+      <th>{{'HOME.NAMESERVER'|translate}}</th>
+      <th>{{'HOME.RECORDS'|translate}}</th>
+      <th>
+        <button ng-click="$ctrl.reload()" class="button"><i class="fas fa-sync">&nbsp;</i>{{'GEN.RELOAD'|translate}}</button>
+      </th>
+    </tr>
+  </thead>
+
+  <tr ng-repeat="zone in $ctrl.zones | orderBy:'name'">
+    <td>{{zone.name}}</td>
+    <td>{{zone.nameserver}}</td>
+    <td>{{zone.records.length}}</td>
+    <td>
+      <button ng-click="$ctrl.zoneDelete(zone)" class="button is-danger"><i class="fas fa-trash">&nbsp;</i>{{'GEN.DELETE'|translate}}</button>
+      <a class="button is-link" href="#/zone/{{zone.name}}"><i class="fas fa-edit">&nbsp;</i>{{'GEN.EDIT'|translate}}</a>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div class="field">
+        <div class="control">
+          <input ng-model="$ctrl.zoneNew.name" class="input" type="text" placeholder="example.org.">
+        </div>
+        <p class="help">{{'HOME.NAME_HINT'|translate}}</p>
+      </div>
+    </td>
+    <td>
+      <div class="field">
+        <div class="control">
+          <input ng-model="$ctrl.zoneNew.nameserver" class="input" type="text" placeholder="nameserver.provider.org.">
+        </div>
+        <p class="help">{{'HOME.NAMESERVER_HINT'|translate}}</p>
+      </div>
+    <td></td>
+    <td>
+      <button ng-click="$ctrl.zoneCreate()" class="button is-success"><i class="fas fa-plus">&nbsp;</i>{{'GEN.CREATE'|translate}}</button>
+    </td>
+  </tr>
+</table>

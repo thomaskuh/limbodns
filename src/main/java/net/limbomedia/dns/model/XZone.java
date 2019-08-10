@@ -6,12 +6,12 @@ import java.util.List;
 
 public class XZone implements Serializable {
 
-	private static final long serialVersionUID = -956093252445398449L;
+	private static final long serialVersionUID = 1L;
 
 	private String name;
 	private String nameserver;
 	private long serial = 1L;
-
+	
 	private List<XRecord> records = new ArrayList<XRecord>();
 
 	public String getName() {
@@ -47,13 +47,25 @@ public class XZone implements Serializable {
 	}
 
 	public void setRecords(List<XRecord> records) {
-		this.records = records;
+    this.records = records;
+	  if(records != null) {
+	    records.forEach(record -> record.setZone(this));
+	  }
+	}
+	
+	public void addRecord(XRecord record) {
+	  this.records.add(record);
+	  record.setZone(this);
+	}
+	
+	public void removeRecord(XRecord record) {
+	  this.records.remove(record);
+	  record.setZone(null);
 	}
 
 	@Override
 	public String toString() {
-		return "XZone [name=" + name + ", nameserver=" + nameserver
-				+ ", serial=" + serial + "]";
+		return "XZone [name=" + name + ", nameserver=" + nameserver + ", serial=" + serial + "]";
 	}
 
 	

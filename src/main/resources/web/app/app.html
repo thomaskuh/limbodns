@@ -1,0 +1,22 @@
+<nav class="navbar is-fixed-top is-link">
+	<div class="navbar-brand">
+    	<a class="navbar-item" href="#/home">
+    		<span tk-loading-not class="icon"><i class="fas fa-home"></i></span>
+    		<span tk-loading class="icon"><i class="fas fa-spinner fa-spin"></i></span>
+    		<b>{{'GEN.TITLE'|translate}}</b>
+    	</a>
+	</div>
+	   <div class="navbar-end">
+      <div class="navbar-item">
+        <div class="buttonsss">
+          <tk-login-button></tk-login-button>
+        </div>
+      </div>
+    </div>
+</nav>
+
+<div class="container is-fluid">
+  <ng-outlet></ng-outlet>
+</div>
+
+<tk-toasts></tk-toasts>

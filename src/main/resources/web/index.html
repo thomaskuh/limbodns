@@ -1,132 +1,18 @@
-<!DOCTYPE html>
-<html lang="en" ng-app="theApp">
-<head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<!doctype html>
+<html lang="en" ng-app="app" class="has-navbar-fixed-top">
+  <head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>LimboDNS</title>
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/custom.css" rel="stylesheet">
-</head>
-<body ng-controller="MainCtrl">
-    
-	<nav class="navbar navbar-inverse navbar-fixed-top">
-		<div class="container">
-			<div class="navbar-header">
-				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-	            	<span class="sr-only">Toggle navigation</span>
-	            	<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-				</button>
-				<a class="navbar-brand" href="#">LimboDNS</a>
-			</div>
-			<div id="navbar" class="navbar-collapse collapse">
-				<form class="navbar-form navbar-right">
-					<div class="form-group">
-					</div>
-					<button type="submit" class="btn btn-primary" ng-click="reloadZones()"><span class="glyphicon glyphicon-refresh"></span> Refresh</button>
-				</form>
-			</div>        
-		</div>
-	</nav>
-
-    <div class="container">
-    	
-    	<!-- LIST ZONES -->
-		<div class="panel panel-default" ng-repeat="zone in zones">
-					<div class="panel-heading">
-						<button type="button" class="btn btn-danger pull-right btn-xs" ng-click="zoneDelete(zone)"> <span class="glyphicon glyphicon-trash"></span></button>
-  						<h1 class="panel-title"><strong>{{zone.name}}</strong></h1>
-  						<small>This Nameservers name: {{zone.nameserver}} (Required SOA & NS records are created automatically.)</small>
-					</div>
- 				<div class="panel-body">
-   				
-   				<table class="table table-striped">
-   					<thead>
-   						<tr><th>Name</th><th>Type</th><th>Last change</th><th>Value</th><th>Actions</th></tr>
-   					</thead>
-   					<tr ng-repeat="rec in zone.records">
-   						<td>{{rec.name}}</td>
-   						<td>{{rec.type}}</td>
-   						<td>{{rec.lastChange | date:'yyyy-MM-dd HH:mm:ss'}}</td>
-   						<td><input ng-model="rec.value" type="text" class="form-control input-sm" placeholder=""></td>
-   						<td>
-   							<button type="button" class="btn btn-success btn-sm" ng-click="recordUpdate(rec)"> <span class="glyphicon glyphicon-floppy-disk"></span></button>
-   							<button type="button" class="btn btn-danger btn-sm" ng-click="recordDelete(rec)"> <span class="glyphicon glyphicon-trash"></span></button>
-   							<button type="button" class="btn btn-info btn-sm" ng-click="showInfo(zone,rec)"> <span class="glyphicon glyphicon-info-sign"></span></button>
-   						</td>
-   					</tr>
-   					<tr>
-   						<td><input type="text" class="form-control input-sm" ng-model="newrec.name"  placeholder="www"></td>
-   						<td><select class="form-control input-sm" ng-model="newrec.type" ng-options="type for type in types"></select></td>
-   						<td>now</td>
-   						<td><input type="text" class="form-control input-sm" ng-model="newrec.value"  placeholder="127.0.0.1"></td>
-   						<td>
-   							<button type="button" class="btn btn-success btn-sm" ng-click="recordCreate(zone)"> <span class="glyphicon glyphicon-plus"></span> Add</button>
-   						</td>
-   					</tr>   					
-   				</table>
-				</div>
-		</div>
-		
-		<!-- NEW ZONE -->
-		<legend class="ng-binding">Create new zone</legend>
-		<form class="form-horizontal" ng-submit="zoneCreate()">
-			<div class="form-group">
-				<label for="inputZoneName" class="col-sm-2 control-label">Zone name</label>
-    			<div class="col-sm-10">
-      				<input ng-model="newzone.name" type="text" class="form-control" id="inputZoneName" placeholder="example.org.">
-    			</div>
-  			</div>
-			<div class="form-group">
-				<label for="inputZoneNameserver" class="col-sm-2 control-label">Nameserver</label>
-    			<div class="col-sm-10">
-      				<input ng-model="newzone.nameserver" type="text" class="form-control" id="inputZoneNameserver" placeholder="ns.example.org.">
-    			</div>
-  			</div>
-			<div class="form-group">
-				<div class="col-sm-offset-2 col-sm-10">
-      				<button type="submit" class="btn btn-default">Create zone</button>
-    			</div>
-  			</div>
-		</form>
-		
-		
-    </div>
-   
-	<!-- Modal -->
-	<div class="modal fade" id="myPupup" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	  <div class="modal-dialog">
-	    <div class="modal-content">
-	      <div class="modal-header">
-	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-	        <h4 class="modal-title" id="myModalLabel">DynamicDNS Update URLs</h4>
-	      </div>
-	      <div class="modal-body">
-			<strong>Update-URL for clients knowing their own IP</strong><br/>
-			<a href="{{uurl.manu}}" target="_blank">{{uurl.manu}}</a>
-			 <hr/>
-	      	<strong>Update-URL for IP auto-detection</strong><br/>
-			<a href="{{uurl.auto}}" target="_blank">{{uurl.auto}}</a>
-			<br/><br/>
-			<strong>Remember:</strong> Auto-update will only work if the caller uses the same IP protocol as the record that should be updated, especially if both nameserver and client support IPv4 AND IPv6.<br/><br/>  
-			Wget users simply force the right protocol:
-<pre>wget {{uurl.wget}} -qO - {{uurl.auto}}</pre>
-
-	      </div>
-	      <div class="modal-footer">
-	        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-	      </div>
-	    </div>
-	  </div>
-	</div>
-    
-	
-	<script src="js/jquery-2.1.3.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <script src="js/angular.min.js"></script>
-    <script src="js/custom.js"></script>
-    
-  </body>
+		<link rel="stylesheet" href="css/pack.css">
+		<link rel="stylesheet" href="css/style.css">
+	</head>
+	<body>
+		<app></app>
+		<script src="js/pack.js"></script>
+		<script src="app/app.js"></script>
+		<script src="app/pageHome.js"></script>
+		<script src="app/pageZone.js"></script>
+		<script src="app/pageRecord.js"></script>
+	</body>
 </html>

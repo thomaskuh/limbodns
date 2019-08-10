@@ -1,94 +1,52 @@
 package net.limbomedia.dns.web;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.kuhlins.webkit.HttpUtils;
 
 import net.limbomedia.dns.ZoneManager;
 import net.limbomedia.dns.model.Config;
+import net.limbomedia.dns.model.UpdateResult;
 
-public class UpdateServlet extends HttpServlet {
-	
-	private static final Logger L = LoggerFactory.getLogger(UpdateServlet.class);
-	
-	private static final long serialVersionUID = -6612011519927117470L;
-	
-	private ZoneManager zoneManager;
-	private Config config;
-	
-	public UpdateServlet(Config config, ZoneManager zoneManager) {
-		this.config = config;
-		this.zoneManager = zoneManager;
-	}
-	
-	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		processRequest(req, resp);
-	}
-	
-	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		processRequest(req, resp);
-	}
-	
-	private void processRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String[] split = req.getPathInfo().split("/");
-		int parts = split.length;
-		
-		// Get remote address from request or header (reverse proxy configuration)
-		String remoteAddress = null;
-		
-		if(config.getRemoteAddressHeader() != null && !config.getRemoteAddressHeader().isEmpty()) {
-			String addrHeader = req.getHeader(config.getRemoteAddressHeader());
-			if(addrHeader != null) {
-				// multiple proxies may concat "client, proxy1, proxy2, proxy3, ...";
-				String[] split2 = addrHeader.split(",");
-				remoteAddress = split2[0].trim();
-			}
-		}
-		
-		// Fallback to classic remote address
-		if(remoteAddress == null || remoteAddress.isEmpty()) {
-			remoteAddress = req.getRemoteAddr();
-		}
-		
-		
-		String value = null;
-		if(parts == 2) {
-			// Detect IP
-			value = remoteAddress;
-		}
-		else if (parts == 3) {
-			// Use submitted IP
-			value = split[2];
-		}
-		else {
-			// invalid. Will result in a 404.
-			return;
-		}
-		
-		// Record identifier
-		String recordID = split[1];
-		
-		resp.setContentType("text/plain");
-		resp.setCharacterEncoding("UTF-8");
-		
-		PrintWriter w = resp.getWriter();
-		try {
-			zoneManager.recordUpdate(req.getRemoteAddr(), recordID,value);
-			w.println("OK. New value: " + value);
-			resp.setStatus(200);
-		} catch (Exception e) {
-			w.println("Fail. " + e.getMessage());
-			resp.setStatus(500);
-		}
-		
-	}
+public class UpdateServlet extends ServletGeneric {
+
+  private static final long serialVersionUID = -6612011519927117470L;
+
+  private ZoneManager zoneManager;
+  private Config config;
+
+  private static Pattern PATTERN_UPDATE = Pattern.compile("^/([a-zA-Z0-9\\-]+)/?([0-9a-fA-F:\\.]+)?$");
+
+  public UpdateServlet(Config config, ZoneManager zoneManager) {
+    this.config = config;
+    this.zoneManager = zoneManager;
+    handlers.add(this::handleUpdate);
+  }
+
+  private boolean handleUpdate(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    Matcher matcher = PATTERN_UPDATE.matcher(req.getPathInfo());
+    if (!matcher.matches()) {
+      return false;
+    }
+
+    String remoteAddress = HttpUtils.remoteAdr(req, config.getRemoteAddressHeader());
+
+    String token = matcher.group(1);
+    String value = matcher.group(2);
+
+    if (value == null || value.isEmpty()) {
+      value = remoteAddress;
+    }
+
+    UpdateResult result = zoneManager.recordDynDNS(remoteAddress, token, value);
+    mapper.writeValue(resp.getOutputStream(), result);
+
+    return true;
+  }
+
 }

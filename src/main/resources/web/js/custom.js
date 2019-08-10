@@ -94,7 +94,7 @@ theApp.controller('MainCtrl', function ($scope,$http) {
 			error(function(data, status, headers, config) {
 				alert("Error: " + data);
 			});
-	}	
+	}
 	
 	$scope.zoneCreate = function() {
 		$http.post('/api/zoneCreate', {name:$scope.newzone.name, nameserver:$scope.newzone.nameserver}).

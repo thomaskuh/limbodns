@@ -1,0 +1,73 @@
+{
+	"GEN": {
+		"TITLE": "LimboDNS",
+		"NOW": "Now",
+		"CREATE": "Create",
+		"DELETE": "Delete",
+		"SAVE": "Save",
+		"EDIT": "Edit",
+		"INFO": "Info",
+		"BACK": "Back",
+		"RELOAD": "Reload",
+		"GENERATED": "Generated",
+		"UNDO": "Undo"
+	},
+	"LOGIN": {
+		"TITLE": "Login",
+		"USER": "Username",
+		"PASS": "Password",
+		"SUBMIT": "Let me in",
+		"IN": "Login",
+		"OUT": "Logout"
+	},
+  "HOME": {
+    "TITLE": "Zones",
+    "SUBTITLE": "All the zones managed by this LimboDNS.",
+    "ZONE": "Zone",
+    "NAMESERVER": "Nameserver",
+    "RECORDS": "Records",
+    "NAME_HINT": "Don't forget the trailing dot indicating an absolute name.",
+    "NAMESERVER_HINT": "Authoritative name server for this zone. Used for auto-generation of required NS and SOA records."
+	},
+	"ZONE": {
+		"TITLE": "Zone",
+    "RR_NAME": "Name",
+    "RR_TYPE": "Type",
+    "RR_DATE": "Last change/update",
+    "RR_TOKEN": "DynDNS Update Token",
+    "RR_VALUE": "Value",
+    "TOKENGEN": "Generate token"
+	},
+	"RECORD": {
+		"TITLE": "DynDNS Update Instructions",
+		"SUBTITLE": "for {{type}} record: ",
+		"KNOWN_TITLE": "Clients knowing their own IP send a HTTP GET like this:",
+		"UNKNOWN_TITLE": "For IP auto-detection simply omit the IP:",
+		"UNKNOWN_HINT": "Note: Auto-update will only work if the caller uses the same IP protocol as the record that should be updated, especially if both nameserver and client support IPv4 AND IPv6.",
+		"WGET_TITLE": "Wget users simply force the right protocol:",
+		"NO_TOKEN": "No token specified!",
+		"NO_TOKEN_HINT": "To use the DynDNS feature you need to set a token for your record. The token is your unique identifier and password, so choose a proper length."
+	},
+  "ERROR": {
+    "NETWORK": "Network error.",
+    "SYSTEM": "System failure.",
+    "UNAUTHORIZED": "Unauthorized. Please log in.",
+    "FORBIDDEN": "Forbidden. Permission denied.",
+    "NOTFOUND": "Not found.",
+    "VALIDATION": "Validation failure.",
+    "DETAIL": {
+      "VAL_ZONE_NAME_INVALID": "Name must be an absolute name ending with '.' and characters: 'a-zA-Z0-9-.'.",
+      "VAL_ZONE_NAME_EXISTS": "Name already exists.",
+      "VAL_NAMESERVER_INVALID": "Nameserver must be an absolute name ending with '.' and characters: 'a-zA-Z0-9-.'.",
+      "VAL_RECORD_NAME_INVALID": "Name must be an relative name with characters: 'a-zA-Z0-9-.@'.",
+      "VAL_RECORD_TYPE_INVALID": "Type must be one of: 'A','AAAA','CNAME'.",
+      "VAL_RECORD_TOKEN_INVALID": "Token only allows characters: 'a-zA-Z0-9-'.",
+      "VAL_RECORD_VALUE_INVALID": "Value invalid.",
+      "VAL_RECORD_VALUE_A_INVALID": "A value must a valid IPv4 address.",
+      "VAL_RECORD_VALUE_AAAA_INVALID": "AAAA value must be a valid IPv6 address.",
+      "VAL_RECORD_VALUE_CNAME_INVALID": "CNAME value must be an absolute name ending with '.' and characters: 'a-zA-Z0-9-.'.",
+      "VAL_RECORD_NAME_CONFLICT": "There's either one CNAME or multiple OTHER records allowed with the same name.",
+      "VAL_RECORD_TOKEN_EXISTS": "Token already exists. Must be globally unique."
+    }
+	}
+}

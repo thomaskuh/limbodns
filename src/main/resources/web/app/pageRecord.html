@@ -1,0 +1,25 @@
+<h1 class="title">{{'RECORD.TITLE'|translate}}<a class="is-pulled-right " href="#/zone/{{$ctrl.zone.name}}"><i class="fas fa-arrow-circle-left"></i>Back</a></h1>
+<h2 class="subtitle">{{'RECORD.SUBTITLE'|translate:{'type': $ctrl.record.type} }}{{$ctrl.record.name}}.{{$ctrl.zone.name}}</h2>
+
+<br/>
+
+<div ng-if="!$ctrl.record.token">
+	<article class="message is-danger">
+	  <div class="message-header"><p>{{'RECORD.NO_TOKEN'|translate}}</p></div>
+	  <div class="message-body">{{'RECORD.NO_TOKEN_HINT'|translate}}</div>
+	</article>
+	<br/>
+</div>
+
+<div ng-if="$ctrl.record.token">
+	<h4 class="title is-4">{{'RECORD.KNOWN_TITLE'|translate}}</h4>
+	<article class="message"><div class="message-body">{{$ctrl.uurl.manu}}</div></article>
+	
+	
+	<h4 class="title is-4">{{'RECORD.UNKNOWN_TITLE'|translate}}</h4>
+	<article class="message"><div class="message-body">{{$ctrl.uurl.auto}}</div></article>
+	<p>{{'RECORD.UNKNOWN_HINT'|translate}}</p><br/>
+	
+	<h4 class="title is-4">{{'RECORD.WGET_TITLE'|translate}}</h4>
+	<article class="message"><div class="message-body">{{$ctrl.uurl.wget}}</div></article>
+</div>

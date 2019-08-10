@@ -1,31 +1,15 @@
 package net.limbomedia.dns.web;
 
-import java.security.Principal;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.security.auth.Subject;
-
-import org.eclipse.jetty.security.ConstraintMapping;
-import org.eclipse.jetty.security.ConstraintSecurityHandler;
-import org.eclipse.jetty.security.DefaultUserIdentity;
-import org.eclipse.jetty.security.HashLoginService;
-import org.eclipse.jetty.security.MappedLoginService.KnownUser;
-import org.eclipse.jetty.security.authentication.BasicAuthenticator;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.UserIdentity;
 import org.eclipse.jetty.server.handler.ContextHandler;
-import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
-import org.eclipse.jetty.util.security.Constraint;
-import org.eclipse.jetty.util.security.Credential;
-import org.eclipse.jetty.util.security.Password;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,74 +17,53 @@ import net.limbomedia.dns.ZoneManager;
 import net.limbomedia.dns.model.Config;
 
 public class WebServer {
-	
-	private static final Logger L = LoggerFactory.getLogger(WebServer.class);
-	
-	private Server server = new Server();
-	
-	public WebServer(Config config, ZoneManager zoneManager) {
-		L.info("Starting webserver on port " + config.getPortHTTP() + ".");
-        ServerConnector connector = new ServerConnector(server);
-        connector.setPort(config.getPortHTTP());
-        server.setConnectors(new Connector[] { connector });
-        
-        ResourceHandler resHandler = new ResourceHandler();
-        resHandler.setBaseResource(Resource.newClassPathResource("/web"));
-        
-        ContextHandler ctxHandler = new ContextHandler("/");
-        ctxHandler.setHandler(resHandler);
-        
-        ServletContextHandler ctxServlet = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
-        ctxServlet.setContextPath("/");
-        ctxServlet.addServlet(new ServletHolder(new GuiServlet(zoneManager)),"/api/*");
-        ctxServlet.addServlet(new ServletHolder(new UpdateServlet(config,zoneManager)),"/update/*");
-        
-        HandlerCollection handlers = new HandlerCollection();
-        handlers.addHandler(ctxHandler);
-        handlers.addHandler(ctxServlet);
 
-        // Security:
-        Credential credential = new Password(config.getPassword());
-        Principal principal = new KnownUser("admin",credential);
+  private static final Logger L = LoggerFactory.getLogger(WebServer.class);
+
+  private Server server = new Server();
+
+  public WebServer(Config config, ZoneManager zoneManager) {
+    L.info("Starting webserver on port " + config.getPortHTTP() + ".");
+    ServerConnector connector = new ServerConnector(server);
+    connector.setPort(config.getPortHTTP());
+    server.setConnectors(new Connector[] { connector });
+
+    /*
+     * Some strange things about Jetty and unhandled requests: They pass
+     * ResourceHandler BUT not for path / cause disabled directory listing leads to
+     * a 403 instead. They pass ServletHandler/ServletContextHandler but only if
+     * ensureDefaultServlet is disabled.
+     */
+
+    // Own servlets
+    ServletHandler handlerServlets = new ServletHandler();
+    handlerServlets.setEnsureDefaultServlet(false);
+    handlerServlets.addServletWithMapping(new ServletHolder(new ServletApi(config, zoneManager)), "/api/*");
+    handlerServlets.addServletWithMapping(new ServletHolder(new UpdateServlet(config, zoneManager)), "/update/*");
+    handlerServlets.addFilterWithMapping(new FilterHolder(new SecurityFilter(config.getPassword())), "/api/*", 0);
+
+    // Own web resources (ctx handler is required so / will be forwarded not redirected to /index.html)
+    ResourceHandler handlerWeb = new ResourceHandler();
+    handlerWeb.setBaseResource(Resource.newClassPathResource("/web"));
+    handlerWeb.setWelcomeFiles(new String[] { "index.html" });
+    ContextHandler ctxHandlerWeb = new ContextHandler("/");
+    ctxHandlerWeb.setHandler(handlerWeb);
+    
+    // webkit resources
+    ResourceHandler handlerWebkit = new ResourceHandler();
+    handlerWebkit.setBaseResource(Resource.newClassPathResource("/webkit"));
         
-        Subject subject = new Subject();
-        subject.getPrincipals().add(principal);
-        subject.getPrivateCredentials().add(credential);
-        
-        DefaultUserIdentity identity = new DefaultUserIdentity(subject, principal, new String[] {"user"});
-        
-        Map<String, UserIdentity> users = new HashMap<String, UserIdentity>();
-        users.put("admin", identity);
-        
-        
-        HashLoginService loginService = new HashLoginService("LimboDNS");
-        loginService.setUsers(users);
-        server.addBean(loginService); 
-        
-        ConstraintSecurityHandler security = new ConstraintSecurityHandler();
-        server.setHandler(security);
-        
-        Constraint constraint = new Constraint();
-        constraint.setName("auth");
-        constraint.setAuthenticate( true );
-        constraint.setRoles(new String[]{"user"});
-        
-        ConstraintMapping mapping = new ConstraintMapping();
-        mapping.setPathSpec( "/api/*" );
-        mapping.setConstraint( constraint );
-        
-        security.setConstraintMappings(Collections.singletonList(mapping));
-        security.setAuthenticator(new BasicAuthenticator());
-        security.setLoginService(loginService);
-        
-        security.setHandler(handlers);
-        
-        try {
-    		server.start();
-	        // server.join();
-		} catch (Exception e) {
-			throw new RuntimeException("Cannot start webserver. " + e.getMessage(),e);
-		}
-	}
+    HandlerList handlers = new HandlerList();
+    handlers.addHandler(handlerServlets);
+    handlers.addHandler(ctxHandlerWeb);
+    handlers.addHandler(handlerWebkit);
+    server.setHandler(handlers);
+
+    try {
+      server.start();
+    } catch (Exception e) {
+      throw new RuntimeException("Cannot start webserver. " + e.getMessage(), e);
+    }
+  }
 
 }
