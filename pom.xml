@@ -45,7 +45,7 @@
 		<dependency>
 			<groupId>org.kuhlins.lib</groupId>
 			<artifactId>tk-webkit</artifactId>
-			<version>1.0</version>
+			<version>0.1</version>
 		</dependency>
 
 

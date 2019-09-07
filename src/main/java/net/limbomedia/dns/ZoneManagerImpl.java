@@ -181,6 +181,7 @@ public class ZoneManagerImpl implements ZoneManager, ZoneProvider {
 		record.setType(body.getType());
 		record.setValue(body.getValue());
 		record.setLastChange(new Date());
+		record.setToken(body.getToken());
   
 		zone.addRecord(record);
 		zone.incrementSerial();

@@ -86,7 +86,7 @@ public class XRecord implements Serializable {
 
   @Override
   public String toString() {
-    return "XRecord [id=" + id + ", token=" + token + ",name=" + name + ", type=" + type + ", value=" + value + "]";
+    return "XRecord [id=" + id + ", token=" + token + ", name=" + name + ", type=" + type + ", value=" + value + "]";
   }
 
 }
