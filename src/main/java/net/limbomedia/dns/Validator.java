@@ -18,7 +18,7 @@ import net.limbomedia.dns.model.XZone;
 public class Validator {
 
   private static final String REGEX_ABSOLUTE_NAME = "[a-zA-Z0-9\\-\\.]{1,255}\\.";
-  private static final String REGEX_RELATIVE_NAME = "[a-zA-Z0-9\\-\\.@]{1,255}";
+  private static final String REGEX_RELATIVE_NAME = "[a-zA-Z0-9\\-\\.@\\*]{1,255}";
   private static final String REGEX_TOKEN = "[a-zA-Z0-9\\-]{0,100}";
   
   // For absolute names like: zone name, nameserver, cname value. 

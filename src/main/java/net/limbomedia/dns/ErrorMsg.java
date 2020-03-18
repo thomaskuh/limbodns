@@ -16,7 +16,7 @@ public enum ErrorMsg {
   VAL_ZONE_NAME_EXISTS("Name already exists."),
   VAL_NAMESERVER_INVALID("Nameserver must be an absolute name ending with '.' and characters: 'a-zA-Z0-9-.'."),
   
-  VAL_RECORD_NAME_INVALID("Name must be a relative name with characters: 'a-zA-Z0-9-.@'."),
+  VAL_RECORD_NAME_INVALID("Name must be a relative name with characters: 'a-zA-Z0-9-.@*'."),
   VAL_RECORD_TYPE_INVALID("Type must be one of: 'A','AAAA','CNAME'."),
   VAL_RECORD_TOKEN_INVALID("Token only allows characters: 'a-zA-Z0-9-'."),
   VAL_RECORD_VALUE_INVALID("Value invalid."),
