@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.limbomedia</groupId>
 	<artifactId>limbodns</artifactId>
-	<version>5.2</version>
+	<version>5.3-SNAPSHOT</version>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
