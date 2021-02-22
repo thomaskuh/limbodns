@@ -105,24 +105,22 @@ public class ResolverImpl implements Resolver {
 			}
 		}
 		if ((flags & FLAG_SIGONLY) == 0) {
-			Iterator<?> it = rrset.rrs();
-			while (it.hasNext()) {
-				Record r = (Record) it.next();
+			rrset.rrs().forEach(r -> {
 				if (r.getName().isWild() && !name.isWild()) {
 					r = r.withName(name);
 				}
 				response.addRecord(r, section);
-			}
+			});
 		}
 		if ((flags & (FLAG_SIGONLY | FLAG_DNSSECOK)) != 0) {
-			Iterator<?> it = rrset.sigs();
-			while (it.hasNext()) {
-				Record r = (Record) it.next();
+			rrset.sigs().forEach(r -> {
 				if (r.getName().isWild() && !name.isWild()) {
-					r = r.withName(name);
+					response.addRecord(r.withName(name), section);	
 				}
-				response.addRecord(r, section);
-			}
+				else {
+					response.addRecord(r, section);	
+				}
+			});
 		}
 	}
 
@@ -219,8 +217,7 @@ public class ResolverImpl implements Resolver {
 				}
 				rcode = addAnswer(response, newname, type, dclass, iterations + 1, flags);
 			} else if (sr.isSuccessful()) {
-				RRset[] rrsets = sr.answers();
-				for (RRset rrset : rrsets) {
+				for (RRset rrset : sr.answers()) {
 					addRRset(name, response, rrset, Section.ANSWER, flags);
 				}
 				if (zone != null) {

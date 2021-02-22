@@ -53,33 +53,33 @@
 		<dependency>
 			<groupId>dnsjava</groupId>
 			<artifactId>dnsjava</artifactId>
-			<version>2.1.6</version>
+			<version>3.3.1</version>
 		</dependency>
 
 		<!-- Webserver -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>9.4.27.v20200227</version>
+			<version>9.4.36.v20210114</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
-			<version>9.4.27.v20200227</version>
+			<version>9.4.36.v20210114</version>
 		</dependency>
 
 		<!-- JSON Mapping -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.10.3</version>
+			<version>2.12.1</version>
 		</dependency>
 
 		<!-- Logging -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.26</version>
+			<version>1.7.30</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
