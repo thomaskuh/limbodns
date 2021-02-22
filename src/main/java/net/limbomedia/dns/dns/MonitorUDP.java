@@ -16,8 +16,8 @@ public class MonitorUDP extends Monitor {
 	
 	private static final short PACKET_SIZE = 512;
 	
-	public MonitorUDP(ExecutorService executorService, Resolver resolver, int port) {
-		super(executorService, resolver, port);
+	public MonitorUDP(ExecutorService executorService, Resolver resolver, int port, int timeoutMs) {
+		super(executorService, resolver, port, timeoutMs);
 		
 		LOG.info("Starting DNS UPD on port " + port + ".");
 		
@@ -40,7 +40,7 @@ public class MonitorUDP extends Monitor {
 				socket.receive(packet);
 				executorService.execute(new RunnerUDP(resolver, socket, packet));
 			} catch (Exception e) {
-				LOG.warn("TCP socket error: " + e.getMessage(),e);
+				LOG.warn("UDP Socket error: {} -> {}.", e.getClass().getSimpleName(), e.getMessage(), LOG.isDebugEnabled() ? e : null);				
 			}
 		}
 

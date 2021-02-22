@@ -13,21 +13,24 @@ public class DNServer {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(DNServer.class);
 	
-	private static final int THREADPOOL_SIZE = 5;
+	private static final int THREADPOOL_SIZE_CORE = 3;
+	private static final int THREADPOOL_SIZE_MAX = 10;
+	private static final int QUEUE_SIZE = 1000;
 	
 	private ThreadPoolExecutor threadPool;
 	private MonitorUDP monitorUDP;
 	private MonitorTCP monitorTCP;
 	private Config config;
+	
 	public DNServer(Config config, Resolver resolver) {
 		this.config = config;
-		threadPool = new ThreadPoolExecutor(THREADPOOL_SIZE, THREADPOOL_SIZE, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+		threadPool = new ThreadPoolExecutor(THREADPOOL_SIZE_CORE, THREADPOOL_SIZE_MAX, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(QUEUE_SIZE));
 		
 		if(0 != config.getPortUDP()) {
-			monitorUDP = new MonitorUDP(threadPool, resolver, config.getPortUDP());
+			monitorUDP = new MonitorUDP(threadPool, resolver, config.getPortUDP(), config.getTimeout());
 		}
 		if(0 != config.getPortTCP()) {
-			monitorTCP = new MonitorTCP(threadPool, resolver, config.getPortTCP());
+			monitorTCP = new MonitorTCP(threadPool, resolver, config.getPortTCP(), config.getTimeout());
 		}
 	}
 	

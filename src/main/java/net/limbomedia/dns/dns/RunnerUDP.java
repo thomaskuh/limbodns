@@ -41,14 +41,9 @@ public class RunnerUDP implements Runnable {
 
 			DatagramPacket outdp = new DatagramPacket(response, response.length, packet.getAddress(), packet.getPort());
 
-			try {
-				socket.send(outdp);
-			} catch (IOException e) {
-				LOG.error("Error sending UDP response to " + packet.getAddress() + ". " + e, e);
-			}
-
+			socket.send(outdp);
 		} catch(Exception e){
-			LOG.error("Error processing UDP connection from " + packet.getSocketAddress() + ". " + e.getMessage(),e);
+			LOG.warn("Error processing UDP request from {}:{}. {} -> {}.", packet.getSocketAddress(), packet.getPort(), e.getClass().getSimpleName(), e.getMessage(), LOG.isDebugEnabled() ? e : null);
 		}
 	}
 
