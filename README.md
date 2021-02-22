@@ -18,11 +18,11 @@ sudo apt-get install default-jre-headless
 pacman -S jre-openjdk-headless
 
 # Get it
-wget http://repo.kuhlins.org/artifactory/public/net/limbomedia/limbodns/5.1/limbodns-5.1-jar-with-dependencies.jar
+wget http://repo.kuhlins.org/artifactory/public/net/limbomedia/limbodns/5.3/limbodns-5.3-jar-with-dependencies.jar
 
 # Run it
 # -Ddir specifies where to store config and data. If left, execution directory is used.
-java -Ddir=/path/where/data/should/be/stored -jar limbodns-5.1-jar-with-dependencies.jar
+java -Ddir=/path/where/data/should/be/stored -jar limbodns-5.3-jar-with-dependencies.jar
 
 # Visit admin interface: http://YOUR-SERVER:7777
 ```
