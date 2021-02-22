@@ -24,7 +24,7 @@ public enum ErrorMsg {
   VAL_RECORD_VALUE_AAAA_INVALID("AAAA value must be a valid IPv6 address."),
   VAL_RECORD_VALUE_CNAME_INVALID("CNAME value must be an absolute name ending with '.' and characters: 'a-zA-Z0-9-.'."),
   VAL_RECORD_NAME_CONFLICT("There's either one CNAME or multiple OTHER records allowed with the same name."),
-  VAL_RECORD_TOKEN_EXISTS("Token already exists. Must be globally unique.");
+  VAL_RECORD_TOKEN_EXISTS("Same token cannot be used for multiple records with different types.");
   
   private ErrorMsg(String text) {}
 

@@ -1,6 +1,7 @@
 package net.limbomedia.dns.web;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,7 +44,7 @@ public class UpdateServlet extends ServletGeneric {
       value = remoteAddress;
     }
 
-    UpdateResult result = zoneManager.recordDynDNS(remoteAddress, token, value);
+    List<UpdateResult> result = zoneManager.recordDynDNS(remoteAddress, token, value);
     mapper.writeValue(resp.getOutputStream(), result);
 
     return true;

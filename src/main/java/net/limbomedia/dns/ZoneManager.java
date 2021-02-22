@@ -1,6 +1,7 @@
 package net.limbomedia.dns;
 
 import java.util.Collection;
+import java.util.List;
 
 import net.limbomedia.dns.model.UpdateResult;
 import net.limbomedia.dns.model.XRecord;
@@ -17,6 +18,6 @@ public interface ZoneManager {
   public XRecord recordCreate(String whoDidIt, String zoneId, XRecord body);
   public void recordDelete(String whoDidIt, String zoneId, String recordId);
   public XRecord recordUpdate(String whoDidIt, String zoneId, String recordId, XRecord body);
-  public UpdateResult recordDynDNS(String whoDidIt, String recordToken, String value);
+  public List<UpdateResult> recordDynDNS(String whoDidIt, String recordToken, String value);
 
 }
