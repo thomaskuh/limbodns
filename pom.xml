@@ -5,17 +5,77 @@
 	<artifactId>limbodns</artifactId>
 	<version>5.5-SNAPSHOT</version>
 
+	<scm>
+		<developerConnection>scm:git:ssh://git@github.com/thomaskuh/limbodns.git</developerConnection>
+		<tag>HEAD</tag>
+	</scm>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.release>11</maven.compiler.release>
 	</properties>
 
 	<build>
     <finalName>limbodns</finalName>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.10.1</version>
+				<configuration>
+					<release>11</release>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+    			<artifactId>maven-release-plugin</artifactId>
+    			<version>3.0.0-M6</version>
+				<configuration>
+					<tagNameFormat>release-@{project.version}</tagNameFormat>
+					<preparationGoals>clean verify docker:build</preparationGoals>
+					<goals>deploy docker:build docker:push</goals>
+				</configuration>
+      		</plugin>
+			<plugin>
+				<groupId>io.fabric8</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.40.1</version>
+				<configuration>
+					<images>
+						<image>
+							<alias>app</alias> 
+							<name>limbomedia/limbodns:${project.version}</name>
+							<build> 
+								<noCache>true</noCache>
+								<dockerFile>Dockerfile</dockerFile>
+								<tags>
+									<tag>latest</tag>
+									<tag>${project.version}</tag>
+								</tags>
+								<assembly>
+									<targetDir>/</targetDir>
+									<inline>
+										<fileSets>
+											<fileSet>
+												<directory>${project.build.directory}</directory>
+												<outputDirectory>/</outputDirectory>
+												<includes>
+													<include>limbodns-jar-with-dependencies.jar</include>
+												</includes>
+											</fileSet>         
+										</fileSets>
+									</inline>
+								</assembly>
+							</build>
+						</image>
+					</images>
+				</configuration>
+			</plugin>    		
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.4.1</version>
 				<configuration>
 					<archive>
 						<manifest>
@@ -60,19 +120,19 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>9.4.42.v20210604</version>
+			<version>9.4.48.v20220622</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
-			<version>9.4.42.v20210604</version>
+			<version>9.4.48.v20220622</version>
 		</dependency>
 
 		<!-- JSON Mapping -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.12.3</version>
+			<version>2.13.3</version>
 		</dependency>
 
 		<!-- Logging -->
