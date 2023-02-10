@@ -34,7 +34,9 @@ public class ZoneManagerImpl implements ZoneManager, ZoneProvider {
 	private static final Logger L = LoggerFactory.getLogger(ZoneManagerImpl.class);
 
 	private Persistence persistence;
-
+	
+	private boolean log;
+	
 	/**
 	 * Internal zone model used for persistance and api.
 	 */
@@ -45,9 +47,10 @@ public class ZoneManagerImpl implements ZoneManager, ZoneProvider {
 	 */
 	private Map<Name, Zone> resolveMap = new HashMap<Name, Zone>();
 
-	public ZoneManagerImpl(Persistence persistence) throws IOException {
+	public ZoneManagerImpl(Persistence persistence, boolean log) throws IOException {
 		this.persistence = persistence;
-
+		this.log = log;
+		
 		// Load zones initially
 		zones = this.persistence.zonesLoad();
 		updateResolveMap();
@@ -263,9 +266,10 @@ public class ZoneManagerImpl implements ZoneManager, ZoneProvider {
 			record.setValue(value);
 			record.setLastChange(now);
 		}
-
-		L.info("Value updated ({}). By: {}, Zone: {}, {}.", result.isChanged() ? "change" : "same", whoDidIt,
-				record.getZone().getName(), record);
+		if(log) {
+			L.info("Value updated ({}). By: {}, Zone: {}, {}.", result.isChanged() ? "change" : "same", whoDidIt,
+					record.getZone().getName(), record);
+		}
 
 		return result;
 	}

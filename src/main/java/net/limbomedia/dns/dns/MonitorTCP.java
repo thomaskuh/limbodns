@@ -14,8 +14,8 @@ public class MonitorTCP extends Monitor {
 	
 	private ServerSocket socket;
 	
-	public MonitorTCP(ExecutorService executorService, Resolver resolver, int port, int timeoutMs) {
-		super(executorService, resolver, port, timeoutMs);
+	public MonitorTCP(ExecutorService executorService, Resolver resolver, int port, int timeoutMs, boolean log) {
+		super(executorService, resolver, port, timeoutMs, log);
 		
 		LOG.info("Starting DNS TCP on port " + port + ".");
 		
@@ -34,7 +34,7 @@ public class MonitorTCP extends Monitor {
 			try {
 				Socket accept = socket.accept();
 				accept.setSoTimeout(timeoutMs);
-				executorService.execute(new RunnerTCP(resolver, accept));
+				executorService.execute(new RunnerTCP(resolver, accept, log));
 			} catch (Exception e) {
 				LOG.warn("TCP Socket error: {} -> {}.", e.getClass().getSimpleName(), e.getMessage(), LOG.isDebugEnabled() ? e : null);
 			}

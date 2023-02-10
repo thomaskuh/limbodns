@@ -27,10 +27,10 @@ public class DNServer {
 		threadPool = new ThreadPoolExecutor(THREADPOOL_SIZE_CORE, THREADPOOL_SIZE_MAX, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>(QUEUE_SIZE));
 		
 		if(0 != config.getPortUDP()) {
-			monitorUDP = new MonitorUDP(threadPool, resolver, config.getPortUDP(), config.getTimeout());
+			monitorUDP = new MonitorUDP(threadPool, resolver, config.getPortUDP(), config.getTimeout(), config.isLogQuery());
 		}
 		if(0 != config.getPortTCP()) {
-			monitorTCP = new MonitorTCP(threadPool, resolver, config.getPortTCP(), config.getTimeout());
+			monitorTCP = new MonitorTCP(threadPool, resolver, config.getPortTCP(), config.getTimeout(), config.isLogQuery());
 		}
 	}
 	

@@ -16,7 +16,7 @@ public class LimboDNS {
 	
 	private Logger L = LoggerFactory.getLogger(LimboDNS.class);
 
-  private Persistence persistence;
+	private Persistence persistence;
 	
 	private ZoneManagerImpl zoneManager;
 	private Resolver resolver;
@@ -40,7 +40,7 @@ public class LimboDNS {
 		}
 
 		try {
-			zoneManager = new ZoneManagerImpl(this.persistence);
+			zoneManager = new ZoneManagerImpl(this.persistence, config.isLogUpdate());
 		} catch (IOException e) {
 			L.error("Failed to start LimboDNS. Cannot initialize ZoneManager. {}.", e.getMessage(), e);
 			System.exit(-1);

@@ -16,11 +16,13 @@ public class RunnerTCP implements Runnable {
 
 	private Socket socket;
 	private Resolver resolver;
+	private boolean log;
 
-	public RunnerTCP(Resolver resolver, Socket socket) {
+	public RunnerTCP(Resolver resolver, Socket socket, boolean log) {
 		super();
 		this.resolver = resolver;
 		this.socket = socket;
+		this.log = log;
 	}
 
 	@Override
@@ -41,7 +43,9 @@ public class RunnerTCP implements Runnable {
 			byte[] response = null;
 			try {
 				query = new Message(in);
-				LOG.info("Query: " + ResolverImpl.toString(query.getQuestion()) + " from " + socket.getRemoteSocketAddress());
+				if(log) {
+					LOG.info("Query: {} from {}", ResolverImpl.toString(query.getQuestion()), socket.getRemoteSocketAddress());
+				}
 
 				response = resolver.generateReply(query, in, in.length, socket);
 

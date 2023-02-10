@@ -15,12 +15,14 @@ public class RunnerUDP implements Runnable {
 	private DatagramSocket socket;
 	private DatagramPacket packet;
 	private Resolver resolver;
+	private boolean log;
 	
-	public RunnerUDP(Resolver resolver, DatagramSocket socket, DatagramPacket packet) {
+	public RunnerUDP(Resolver resolver, DatagramSocket socket, DatagramPacket packet, boolean log) {
 		super();
 		this.resolver = resolver;
 		this.socket = socket;
 		this.packet = packet;
+		this.log = log;
 	}
 
 	@Override
@@ -30,7 +32,9 @@ public class RunnerUDP implements Runnable {
 
 			try {
 				Message query = new Message(packet.getData());
-				LOG.info("Query: " + ResolverImpl.toString(query.getQuestion()) + " from " + packet.getSocketAddress());
+				if(log) {
+					LOG.info("Query: {} from {}", ResolverImpl.toString(query.getQuestion()), packet.getSocketAddress());
+				}
 				response = resolver.generateReply(query, packet.getData(), packet.getLength(), null);
 				if (response == null) {
 					return;

@@ -33,10 +33,20 @@ docker run -d -p 7777:7777 -p 53:53/tcp -p 53:53/udp -v DATA-DIR:/data limbomedi
 ```
 
 ## Server Configuration
-Upon the first start and if not already existing, LimboDNS creates the configuration file `[DATA_DIR]/config.json`. Edit to set:
-* Ports (DNS TCP/UDP, Admin interface HTTP)
-* Admin password
-* Forward header if you run LimboDNS behind a reverse proxy
+Upon the first start and if not already existing, LimboDNS creates the configuration file `[DATA_DIR]/config.json`. Edit and restart to customize ports, admin pass, log settings and forward header name for those running LimboDNS behind a reverse proxy. This is how it looks with default values:
+```
+{
+  "portUDP" : 53,
+  "portTCP" : 53,
+  "portHTTP" : 7777,
+  "timeout" : 5000,
+  "remoteAddressHeader" : "X-Forwarded-For",
+  "password" : "admin",
+  "logQuery" : false,
+  "logUpdate" : false
+}
+```
+
 
 ## Client
 A client needs to send a simple HTTP request to update it's record. Therefore the DynDNS token given in the admin ui must be known. Note that one token can be used for multiple records of the same type to update at once. Here're some examples how to update. For sure you substitute localhost:7777 according to your installation and 123 with the token configured on the record to update.
