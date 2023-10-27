@@ -13,23 +13,23 @@ LimboDNS is a nice and simple authoritative Domain Name Server allowing you to r
 
 ## Server Setup - Option 1: One-file-server
 ```
-# Java 8+ is required, so depending on you distribution type something like this:
+# Java 21+ is required, so depending on you distribution type something like this and make sure you have a proper version:
 sudo apt-get install default-jre-headless
 pacman -S jre-openjdk-headless
 
 # Get it
-wget http://repo.kuhlins.org/artifactory/public/net/limbomedia/limbodns/5.3/limbodns-5.3-jar-with-dependencies.jar
+wget https://nexus.kuhlins.org/repository/maven-public/net/limbomedia/limbodns/5.7/limbodns-5.7-jar-with-dependencies.jar
 
 # Run it
 # -Ddir specifies where to store config and data. If left, execution directory is used.
-java -Ddir=/path/where/data/should/be/stored -jar limbodns-5.3-jar-with-dependencies.jar
+java -Ddir=/path/where/data/should/be/stored -jar limbodns-5.7-jar-with-dependencies.jar
 
 # Visit admin interface: http://YOUR-SERVER:7777
 ```
 
 ## Server Setup - Option 2: Docker
 ```
-docker run -d -p 7777:7777 -p 53:53/tcp -p 53:53/udp -v DATA-DIR:/data limbomedia/limbodns
+docker run -d -p 7777:7777 -p 53:53/tcp -p 53:53/udp -v DATA-DIR:/data limbomedia/limbodns:stable
 ```
 
 ## Server Configuration

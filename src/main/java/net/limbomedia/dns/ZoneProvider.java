@@ -5,5 +5,5 @@ import org.xbill.DNS.Zone;
 
 public interface ZoneProvider {
 
-	public Zone zoneGet(Name name);
+    public Zone zoneGet(Name name);
 }

@@ -8,11 +8,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
-
-import org.kuhlins.webkit.ex.NotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import net.limbomedia.dns.model.UpdateResult;
+import net.limbomedia.dns.model.XRecord;
+import net.limbomedia.dns.model.XType;
+import net.limbomedia.dns.model.XZone;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.kuhlins.lib.webkit.ex.NotFoundException;
 import org.xbill.DNS.AAAARecord;
 import org.xbill.DNS.ARecord;
 import org.xbill.DNS.Address;
@@ -24,254 +28,315 @@ import org.xbill.DNS.Record;
 import org.xbill.DNS.SOARecord;
 import org.xbill.DNS.Zone;
 
-import net.limbomedia.dns.model.UpdateResult;
-import net.limbomedia.dns.model.XRecord;
-import net.limbomedia.dns.model.XType;
-import net.limbomedia.dns.model.XZone;
-
 public class ZoneManagerImpl implements ZoneManager, ZoneProvider {
 
-	private static final Logger L = LoggerFactory.getLogger(ZoneManagerImpl.class);
+    private static final Logger L = LogManager.getLogger(ZoneManagerImpl.class);
 
-	private Persistence persistence;
-	
-	private boolean log;
-	
-	/**
-	 * Internal zone model used for persistance and api.
-	 */
-	private Collection<XZone> zones = new ArrayList<XZone>();
+    private Persistence persistence;
 
-	/**
-	 * External zone model used to answer requests via dnsjava.
-	 */
-	private Map<Name, Zone> resolveMap = new HashMap<Name, Zone>();
+    private boolean log;
 
-	public ZoneManagerImpl(Persistence persistence, boolean log) throws IOException {
-		this.persistence = persistence;
-		this.log = log;
-		
-		// Load zones initially
-		zones = this.persistence.zonesLoad();
-		updateResolveMap();
-	}
+    /**
+     * Internal zone model used for persistance and api.
+     */
+    private Collection<XZone> zones = new ArrayList<XZone>();
 
-	private void updateResolveMap() {
-		Map<Name, Zone> result = new HashMap<Name, Zone>();
+    /**
+     * External zone model used to answer requests via dnsjava.
+     */
+    private Map<Name, Zone> resolveMap = new HashMap<Name, Zone>();
 
-		for (XZone xzone : zones) {
-			Zone z;
-			Name nameZone;
+    /**
+     * Synchronize write access to data in a virtual thread compatible way.
+     */
+    private final ReentrantLock lock = new ReentrantLock();
 
-			try {
-				nameZone = new Name(xzone.getName());
-				Name nameNameserver = new Name(xzone.getNameserver());
+    public ZoneManagerImpl(Persistence persistence, boolean log) throws IOException {
+        this.persistence = persistence;
+        this.log = log;
 
-				// Auto-generate SOA and NS record
-				SOARecord recordSOA = new SOARecord(nameZone, DClass.IN, 3600L, nameNameserver,
-						new Name("hostmaster", nameZone), xzone.getSerial(), 21600L, 7200L, 2160000L, 3600L); // 6h, 2h,
-																												// 25d,
-																												// 1h
-				NSRecord recordNS = new NSRecord(nameZone, DClass.IN, 300L, nameNameserver);
+        // Load zones initially
+        zones = this.persistence.zonesLoad();
+        updateResolveMap();
+    }
 
-				z = new Zone(nameZone, new Record[] { recordSOA, recordNS });
-			} catch (IOException e) {
-				L.warn("Cannot go live with zone {}. {}.", xzone.getName(), e.getMessage(), e);
-				continue;
-			}
+    private void updateResolveMap() {
+        Map<Name, Zone> result = new HashMap<Name, Zone>();
 
-			for (XRecord xrec : xzone.getRecords()) {
-				try {
-					Record r = null;
-					if (XType.A.equals(xrec.getType())) {
-						r = new ARecord(new Name(xrec.getName(), nameZone), DClass.IN, 300L,
-								Address.getByAddress(xrec.getValue()));
-					} else if (XType.AAAA.equals(xrec.getType())) {
-						r = new AAAARecord(new Name(xrec.getName(), nameZone), DClass.IN, 300L,
-								Address.getByAddress(xrec.getValue()));
-					} else if (XType.CNAME.equals(xrec.getType())) {
-						r = new CNAMERecord(new Name(xrec.getName(), nameZone), DClass.IN, 300L,
-								new Name(xrec.getValue()));
-					}
+        for (XZone xzone : zones) {
+            Zone z;
+            Name nameZone;
 
-					if (r == null) {
-						L.warn("Skipping a record in zone {}. Invalid/Unsupported: {}.", xzone.getName(), xrec);
-						continue;
-					} else {
-						z.addRecord(r);
-					}
-				} catch (IOException e) {
-					L.warn("Skipping a record in zone {}. {}.", xzone.getName(), e.getMessage(), e);
-					continue;
-				}
-			}
+            try {
+                nameZone = new Name(xzone.getName());
+                Name nameNameserver = new Name(xzone.getNameserver());
 
-			result.put(z.getOrigin(), z);
-		}
-		this.resolveMap = result;
-	}
+                // Auto-generate SOA and NS record
+                // 1h ttl, 6h refreh, 2h retry, 25d expire, 1h min
+                SOARecord recordSOA = new SOARecord(
+                        nameZone,
+                        DClass.IN,
+                        3600L,
+                        nameNameserver,
+                        new Name("hostmaster", nameZone),
+                        xzone.getSerial(),
+                        21600L,
+                        7200L,
+                        2160000L,
+                        3600L);
+                NSRecord recordNS = new NSRecord(nameZone, DClass.IN, 300L, nameNameserver);
 
-	private void onChange() {
-		updateResolveMap();
+                z = new Zone(nameZone, new Record[] {recordSOA, recordNS});
+            } catch (IOException e) {
+                L.warn("Cannot go live with zone {}. {}.", xzone.getName(), e.getMessage(), e);
+                continue;
+            }
 
-		try {
-			this.persistence.zonesSave(zones);
-		} catch (IOException e) {
-			L.error("Failed to write zone-configuration to file. {}.", e.getMessage(), e);
-		}
-	}
+            for (XRecord xrec : xzone.getRecords()) {
+                try {
+                    Record r = null;
+                    if (XType.A.equals(xrec.getType())) {
+                        r = new ARecord(
+                                new Name(xrec.getName(), nameZone),
+                                DClass.IN,
+                                300L,
+                                Address.getByAddress(xrec.getValue()));
+                    } else if (XType.AAAA.equals(xrec.getType())) {
+                        r = new AAAARecord(
+                                new Name(xrec.getName(), nameZone),
+                                DClass.IN,
+                                300L,
+                                Address.getByAddress(xrec.getValue()));
+                    } else if (XType.CNAME.equals(xrec.getType())) {
+                        r = new CNAMERecord(
+                                new Name(xrec.getName(), nameZone), DClass.IN, 300L, new Name(xrec.getValue()));
+                    }
 
-	private XZone getZone(String name) throws NotFoundException {
-		return zones.stream().filter(x -> x.getName().equals(name)).findAny()
-				.orElseThrow(() -> new NotFoundException(ErrorMsg.NOTFOUND_ZONE.name()));
-	}
+                    if (r == null) {
+                        L.warn("Skipping a record in zone {}. Invalid/Unsupported: {}.", xzone.getName(), xrec);
+                        continue;
+                    } else {
+                        z.addRecord(r);
+                    }
+                } catch (IOException e) {
+                    L.warn("Skipping a record in zone {}. {}.", xzone.getName(), e.getMessage(), e);
+                    continue;
+                }
+            }
 
-	private XRecord getRecord(String recordId) throws NotFoundException {
-		return zones.stream().map(XZone::getRecords).flatMap(List::stream).filter(x -> x.getId().equals(recordId))
-				.findAny().orElseThrow(() -> new NotFoundException(ErrorMsg.NOTFOUND_RECORD.name()));
-	}
+            result.put(z.getOrigin(), z);
+        }
+        this.resolveMap = result;
+    }
 
-	private List<XRecord> getRecordsByToken(String token) {
-		return zones.stream().map(XZone::getRecords).flatMap(List::stream)
-				.filter(x -> x.getToken() != null && x.getToken().equals(token)).collect(Collectors.toList());
-	}
+    private void onChange() {
+        updateResolveMap();
 
-	@Override
-	public Zone zoneGet(Name name) {
-		return resolveMap.get(name);
-	}
+        try {
+            this.persistence.zonesSave(zones);
+        } catch (IOException e) {
+            L.error("Failed to write zone-configuration to file. {}.", e.getMessage(), e);
+        }
+    }
 
-	@Override
-	public Collection<XZone> zoneGets() {
-		return zones;
-	}
+    private XZone getZone(String name) throws NotFoundException {
+        return zones.stream()
+                .filter(x -> x.getName().equals(name))
+                .findAny()
+                .orElseThrow(() -> new NotFoundException(ErrorMsg.NOTFOUND_ZONE.key()));
+    }
 
-	@Override
-	public XZone zoneGet(String zoneId) {
-		return getZone(zoneId);
-	}
+    private XRecord getRecord(String recordId) throws NotFoundException {
+        return zones.stream()
+                .map(XZone::getRecords)
+                .flatMap(List::stream)
+                .filter(x -> x.getId().equals(recordId))
+                .findAny()
+                .orElseThrow(() -> new NotFoundException(ErrorMsg.NOTFOUND_RECORD.key()));
+    }
 
-	@Override
-	public synchronized XZone zoneCreate(String whoDidIt, XZone body) {
-		Validator.validateZone(body, zones);
+    private List<XRecord> getRecordsByToken(String token) {
+        return zones.stream()
+                .map(XZone::getRecords)
+                .flatMap(List::stream)
+                .filter(x -> x.getToken() != null && x.getToken().equals(token))
+                .collect(Collectors.toList());
+    }
 
-		XZone zone = new XZone();
-		zone.setName(body.getName());
-		zone.setNameserver(body.getNameserver());
-		zones.add(zone);
+    @Override
+    public Zone zoneGet(Name name) {
+        return resolveMap.get(name);
+    }
 
-		onChange();
-		L.info("Zone created. By {}, Zone: {}.", whoDidIt, zone);
-		return zone;
-	}
+    @Override
+    public Collection<XZone> zoneGets() {
+        return zones;
+    }
 
-	@Override
-	public synchronized void zoneDelete(String whoDidIt, String zoneId) {
-		XZone zone = getZone(zoneId);
-		zones.remove(zone);
-		onChange();
-		L.info("Zone deleted. By: {}, Zone: {}.", whoDidIt, zone);
-	}
+    @Override
+    public XZone zoneGet(String zoneId) {
+        return getZone(zoneId);
+    }
 
-	@Override
-	public synchronized XRecord recordGet(String zoneId, String recordId) {
-		return getRecord(recordId);
-	}
+    @Override
+    public XZone zoneCreate(String whoDidIt, XZone body) {
+        lock.lock();
+        try {
+            Validator.validateZone(body, zones);
 
-	@Override
-	public synchronized XRecord recordCreate(String whoDidIt, String zoneId, XRecord body) {
-		XZone zone = getZone(zoneId);
+            XZone zone = new XZone();
+            zone.setName(body.getName());
+            zone.setNameserver(body.getNameserver());
+            zones.add(zone);
 
-		Validator.validateRecordCreate(body, zone, zones);
+            onChange();
 
-		XRecord record = new XRecord();
-		record.setId(UUID.randomUUID().toString());
-		record.setName(body.getName());
-		record.setType(body.getType());
-		record.setValue(body.getValue());
-		record.setLastChange(new Date());
-		record.setToken(body.getToken());
+            L.info("Zone created. By {}, Zone: {}.", whoDidIt, zone);
+            return zone;
+        } finally {
+            lock.unlock();
+        }
+    }
 
-		zone.addRecord(record);
-		zone.incrementSerial();
+    @Override
+    public void zoneDelete(String whoDidIt, String zoneId) {
+        lock.lock();
+        try {
+            XZone zone = getZone(zoneId);
+            zones.remove(zone);
+            onChange();
+            L.info("Zone deleted. By: {}, Zone: {}.", whoDidIt, zone);
+        } finally {
+            lock.unlock();
+        }
+    }
 
-		onChange();
-		L.info("Record updated. By: {}, Zone: {}, {}.", whoDidIt, zone.getName(), record);
-		return record;
-	}
+    @Override
+    public XRecord recordGet(String zoneId, String recordId) {
+        return getRecord(recordId);
+    }
 
-	@Override
-	public synchronized void recordDelete(String whoDidIt, String zoneId, String recordId) {
-		XRecord record = getRecord(recordId);
+    @Override
+    public XRecord recordCreate(String whoDidIt, String zoneId, XRecord body) {
+        lock.lock();
+        try {
+            XZone zone = getZone(zoneId);
 
-		XZone zone = record.getZone();
+            Validator.validateRecordCreate(body, zone, zones);
 
-		zone.incrementSerial();
-		zone.removeRecord(record);
+            XRecord record = new XRecord();
+            record.setId(UUID.randomUUID().toString());
+            record.setName(body.getName());
+            record.setType(body.getType());
+            record.setValue(body.getValue());
+            record.setLastChange(new Date());
+            record.setToken(body.getToken());
 
-		onChange();
-		L.info("Record deleted. By: {}, Zone: {}, {}.", whoDidIt, zone.getName(), record);
-	}
+            zone.addRecord(record);
+            zone.incrementSerial();
 
-	@Override
-	public synchronized XRecord recordUpdate(String whoDidIt, String zoneId, String recordId, XRecord body) {
-		XRecord record = getRecord(recordId);
+            onChange();
+            L.info("Record updated. By: {}, Zone: {}, {}.", whoDidIt, zone.getName(), record);
+            return record;
+        } finally {
+            lock.unlock();
+        }
+    }
 
-		Validator.validateRecordUpdate(body, record, zones);
+    @Override
+    public void recordDelete(String whoDidIt, String zoneId, String recordId) {
+        lock.lock();
+        try {
+            XRecord record = getRecord(recordId);
 
-		// Save changes, increment zone-serial, store as file and update zones.
-		record.setToken(body.getToken());
-		if (!record.getValue().equals(body.getValue())) {
-			record.setValue(body.getValue());
-			record.setLastChange(new Date());
-		}
+            XZone zone = record.getZone();
 
-		record.getZone().incrementSerial();
+            zone.incrementSerial();
+            zone.removeRecord(record);
 
-		onChange();
-		L.info("Record updated. By: {}, Zone: {}, {}.", whoDidIt, record.getZone().getName(), record);
-		return record;
-	}
+            onChange();
+            L.info("Record deleted. By: {}, Zone: {}, {}.", whoDidIt, zone.getName(), record);
+        } finally {
+            lock.unlock();
+        }
+    }
 
-	@Override
-	public List<UpdateResult> recordDynDNS(String whoDidIt, String recordToken, String value) {
-		List<XRecord> records = getRecordsByToken(recordToken);
-		if (records.isEmpty()) {
-			throw new NotFoundException();
-		}
+    @Override
+    public XRecord recordUpdate(String whoDidIt, String zoneId, String recordId, XRecord body) {
+        lock.lock();
+        try {
+            XRecord record = getRecord(recordId);
 
-		// All records with same token must have same type, so we check first to match
-		// incoming value
-		Validator.validateRecordValue(records.get(0).getType(), value);
+            Validator.validateRecordUpdate(body, record, zones);
 
-		List<UpdateResult> result = records.stream().map(x -> recordDynDNS(whoDidIt, x, value))
-				.collect(Collectors.toList());
+            // Save changes, increment zone-serial, store as file and update zones.
+            record.setToken(body.getToken());
+            if (!record.getValue().equals(body.getValue())) {
+                record.setValue(body.getValue());
+                record.setLastChange(new Date());
+            }
 
-		if (result.stream().anyMatch(UpdateResult::isChanged)) {
-			onChange();
-		}
+            record.getZone().incrementSerial();
 
-		return result;
-	}
+            onChange();
+            L.info(
+                    "Record updated. By: {}, Zone: {}, {}.",
+                    whoDidIt,
+                    record.getZone().getName(),
+                    record);
+            return record;
+        } finally {
+            lock.unlock();
+        }
+    }
 
-	private UpdateResult recordDynDNS(String whoDidIt, XRecord record, String value) {
-		UpdateResult result = new UpdateResult(record.getZone().getName(), record.getName(), record.getType().name(),
-				false, value);
+    @Override
+    public List<UpdateResult> recordDynDNS(String whoDidIt, String recordToken, String value) {
+        lock.lock();
+        try {
+            List<XRecord> records = getRecordsByToken(recordToken);
+            if (records.isEmpty()) {
+                throw new NotFoundException();
+            }
 
-		Date now = new Date();
-		record.setLastUpdate(now);
+            // All records with same token must have same type, so we check first to match
+            // incoming value
+            Validator.validateRecordValue(records.get(0).getType(), value);
 
-		if (!record.getValue().equals(value)) {
-			result.setChanged(true);
-			record.setValue(value);
-			record.setLastChange(now);
-		}
-		if(log) {
-			L.info("Value updated ({}). By: {}, Zone: {}, {}.", result.isChanged() ? "change" : "same", whoDidIt,
-					record.getZone().getName(), record);
-		}
+            List<UpdateResult> result =
+                    records.stream().map(x -> recordDynDNS(whoDidIt, x, value)).collect(Collectors.toList());
 
-		return result;
-	}
+            if (result.stream().anyMatch(UpdateResult::isChanged)) {
+                onChange();
+            }
 
+            return result;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private UpdateResult recordDynDNS(String whoDidIt, XRecord record, String value) {
+        UpdateResult result = new UpdateResult(
+                record.getZone().getName(), record.getName(), record.getType().name(), false, value);
+
+        Date now = new Date();
+        record.setLastUpdate(now);
+
+        if (!record.getValue().equals(value)) {
+            result.setChanged(true);
+            record.setValue(value);
+            record.setLastChange(now);
+        }
+        if (log) {
+            L.info(
+                    "Value updated ({}). By: {}, Zone: {}, {}.",
+                    result.isChanged() ? "change" : "same",
+                    whoDidIt,
+                    record.getZone().getName(),
+                    record);
+        }
+
+        return result;
+    }
 }

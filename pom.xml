@@ -1,155 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>net.limbomedia</groupId>
-	<artifactId>limbodns</artifactId>
-	<version>5.7-SNAPSHOT</version>
+    <modelVersion>4.0.0</modelVersion>
 
-	<scm>
-		<developerConnection>scm:git:ssh://git@github.com/thomaskuh/limbodns.git</developerConnection>
-		<tag>HEAD</tag>
-	</scm>
+    <parent>
+        <groupId>org.kuhlins.maven</groupId>
+        <artifactId>tk-maven-base</artifactId>
+        <version>0.2</version>
+    </parent>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.release>11</maven.compiler.release>
-	</properties>
+    <groupId>net.limbomedia</groupId>
+    <artifactId>limbodns</artifactId>
+    <version>5.7-SNAPSHOT</version>
 
-	<build>
-    <finalName>limbodns</finalName>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.10.1</version>
-				<configuration>
-					<release>11</release>
-					<encoding>UTF-8</encoding>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-    			<artifactId>maven-release-plugin</artifactId>
-    			<version>3.0.0-M6</version>
-				<configuration>
-					<tagNameFormat>release-@{project.version}</tagNameFormat>
-					<preparationGoals>clean verify docker:build</preparationGoals>
-					<goals>deploy docker:build docker:push</goals>
-				</configuration>
-      		</plugin>
-			<plugin>
-				<groupId>io.fabric8</groupId>
-				<artifactId>docker-maven-plugin</artifactId>
-				<version>0.40.1</version>
-				<configuration>
-					<images>
-						<image>
-							<alias>app</alias> 
-							<name>limbomedia/limbodns:${project.version}</name>
-							<build> 
-								<noCache>true</noCache>
-								<dockerFile>Dockerfile</dockerFile>
-								<tags>
-									<tag>latest</tag>
-									<tag>${project.version}</tag>
-								</tags>
-								<assembly>
-									<targetDir>/</targetDir>
-									<inline>
-										<fileSets>
-											<fileSet>
-												<directory>${project.build.directory}</directory>
-												<outputDirectory>/</outputDirectory>
-												<includes>
-													<include>limbodns-jar-with-dependencies.jar</include>
-												</includes>
-											</fileSet>         
-										</fileSets>
-									</inline>
-								</assembly>
-							</build>
-						</image>
-					</images>
-				</configuration>
-			</plugin>    		
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>3.4.1</version>
-				<configuration>
-					<archive>
-						<manifest>
-							<addClasspath>true</addClasspath>
-							<mainClass>net.limbomedia.dns.LimboDNS</mainClass>
-						</manifest>
-					</archive>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-				</configuration>
-				<executions>
-					<execution>
-						<id>make-my-jar-with-dependencies</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+    <scm>
+        <connection>scm:git:git://github.com/thomaskuh/limbodns.git</connection>
+        <developerConnection>scm:git:git@github.com:thomaskuh/limbodns.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/thomaskuh/limbodns</url>
+    </scm>
 
-	<dependencies>
-		<!-- Web libs -->
-		<dependency>
-			<groupId>org.kuhlins.lib</groupId>
-			<artifactId>tk-webkit</artifactId>
-			<version>0.1</version>
-		</dependency>
+    <dependencies>
+        <!-- Web libs -->
+        <dependency>
+            <groupId>org.kuhlins.lib</groupId>
+            <artifactId>tk-lib-webkit</artifactId>
+            <version>0.3</version>
+        </dependency>
 
+        <!-- DNS Library -->
+        <dependency>
+            <groupId>dnsjava</groupId>
+            <artifactId>dnsjava</artifactId>
+            <version>3.5.2</version>
+        </dependency>
 
-		<!-- DNS Library -->
-		<dependency>
-			<groupId>dnsjava</groupId>
-			<artifactId>dnsjava</artifactId>
-			<version>3.5.2</version>
-		</dependency>
+        <!-- Webserver -->
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>12.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty.ee10</groupId>
+            <artifactId>jetty-ee10-servlet</artifactId>
+            <version>12.0.2</version>
+        </dependency>
 
-		<!-- Webserver -->
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-server</artifactId>
-			<version>10.0.13</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-servlet</artifactId>
-			<version>10.0.13</version>
-		</dependency>
+        <!-- JSON Mapping -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.14.2</version>
+        </dependency>
 
-		<!-- JSON Mapping -->
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>2.14.2</version>
-		</dependency>
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
 
-		<!-- Logging -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>2.0.6</version>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-core</artifactId>
-			<version>1.4.5</version>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>1.4.5</version>
-		</dependency>
-	</dependencies>
+        <!--
+        We use log4j, but:
+        - dnsjava uses slf4j 1.x
+        - jetty uses slf4j 2.x
+        So we:
+        - force slf4j 2.x
+        - and make them log to log4j
+        -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
+        </dependency>
+    </dependencies>
+
+    <repositories>
+        <repository>
+            <id>nexus.kuhlins.org</id>
+            <url>https://nexus.kuhlins.org/repository/maven-public</url>
+        </repository>
+    </repositories>
+
+    <build>
+        <finalName>limbodns</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <release>21</release>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <configuration>
+                    <preparationGoals>clean verify docker:build</preparationGoals>
+                    <goals>clean deploy docker:push</goals>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <configuration>
+                    <verbose>true</verbose>
+                    <images>
+                        <image>
+                            <alias>app</alias>
+                            <name>limbomedia/limbodns</name>
+                            <build>
+                                <noCache>true</noCache>
+                                <dockerFile>Dockerfile</dockerFile>
+                                <tags>
+                                    <tag>${project.version}</tag>
+                                    <tag>latest</tag>
+                                    <tag>${dkr.tag}</tag>
+                                </tags>
+                                <assembly>
+                                    <targetDir>/</targetDir>
+                                    <inline>
+                                        <fileSets>
+                                            <fileSet>
+                                                <directory>${project.build.directory}</directory>
+                                                <outputDirectory>/</outputDirectory>
+                                                <includes>
+                                                    <include>limbodns-jar-with-dependencies.jar</include>
+                                                </includes>
+                                            </fileSet>
+                                        </fileSets>
+                                    </inline>
+                                </assembly>
+                            </build>
+                        </image>
+                    </images>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>net.limbomedia.dns.LimboDNS</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-my-jar-with-dependencies</id>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

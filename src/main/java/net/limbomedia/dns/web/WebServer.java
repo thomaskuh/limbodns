@@ -1,69 +1,80 @@
 package net.limbomedia.dns.web;
 
+import java.util.concurrent.Executors;
+import net.limbomedia.dns.ZoneManager;
+import net.limbomedia.dns.model.Config;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.eclipse.jetty.ee10.servlet.FilterHolder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandler;
-import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.util.resource.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import net.limbomedia.dns.ZoneManager;
-import net.limbomedia.dns.model.Config;
+import org.eclipse.jetty.util.resource.ResourceFactory;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 public class WebServer {
 
-  private static final Logger L = LoggerFactory.getLogger(WebServer.class);
+    private static final Logger L = LogManager.getLogger(WebServer.class);
 
-  private Server server = new Server();
+    private Server server;
 
-  public WebServer(Config config, ZoneManager zoneManager) {
-    L.info("Starting webserver on port " + config.getPortHTTP() + ".");
-    ServerConnector connector = new ServerConnector(server);
-    connector.setPort(config.getPortHTTP());
-    server.setConnectors(new Connector[] { connector });
+    public WebServer(Config config, ZoneManager zoneManager) {
+        L.info("Starting webserver on port {}.", config.getPortHTTP());
 
-    /*
-     * Some strange things about Jetty and unhandled requests: They pass
-     * ResourceHandler BUT not for path / cause disabled directory listing leads to
-     * a 403 instead. They pass ServletHandler/ServletContextHandler but only if
-     * ensureDefaultServlet is disabled.
-     */
+        // Jetty seems not yet that virtual thread ready because this guide-recommended
+        // construction still requires and uses a minimum of 3 real threads in that pool.
+        QueuedThreadPool threadPool = new QueuedThreadPool(3);
+        threadPool.setVirtualThreadsExecutor(Executors.newVirtualThreadPerTaskExecutor());
+        server = new Server(threadPool);
 
-    // Own servlets
-    ServletHandler handlerServlets = new ServletHandler();
-    handlerServlets.setEnsureDefaultServlet(false);
-    handlerServlets.addServletWithMapping(new ServletHolder(new ServletApi(config, zoneManager)), "/api/*");
-    handlerServlets.addServletWithMapping(new ServletHolder(new UpdateServlet(config, zoneManager)), "/update/*");
-    handlerServlets.addFilterWithMapping(new FilterHolder(new SecurityFilter(config.getPassword())), "/api/*", 0);
+        ServerConnector connector = new ServerConnector(server);
+        connector.setPort(config.getPortHTTP());
+        server.setConnectors(new Connector[] {connector});
 
-    // Own web resources (ctx handler is required so / will be forwarded not redirected to /index.html)
-    ResourceHandler handlerWeb = new ResourceHandler();
-    handlerWeb.setBaseResource(Resource.newClassPathResource("/web"));
-    handlerWeb.setWelcomeFiles(new String[] { "index.html" });
-    ContextHandler ctxHandlerWeb = new ContextHandler("/");
-    ctxHandlerWeb.setHandler(handlerWeb);
-    
-    // webkit resources
-    ResourceHandler handlerWebkit = new ResourceHandler();
-    handlerWebkit.setBaseResource(Resource.newClassPathResource("/webkit"));
-        
-    HandlerList handlers = new HandlerList();
-    handlers.addHandler(handlerServlets);
-    handlers.addHandler(ctxHandlerWeb);
-    handlers.addHandler(handlerWebkit);
-    server.setHandler(handlers);
+        /*
+         * Some strange things about Jetty and unhandled requests: They pass
+         * ResourceHandler BUT not for path / cause disabled directory listing leads to
+         * a 403 instead. They pass ServletHandler/ServletContextHandler but only if
+         * ensureDefaultServlet is disabled.
+         */
 
-    try {
-      server.start();
-    } catch (Exception e) {
-      throw new RuntimeException("Cannot start webserver. " + e.getMessage(), e);
+        // Own servlets
+        ServletHandler handlerServlets = new ServletHandler();
+        handlerServlets.setEnsureDefaultServlet(false);
+        handlerServlets.addServletWithMapping(new ServletHolder(new ServletApi(config, zoneManager)), "/api/*");
+        handlerServlets.addServletWithMapping(new ServletHolder(new UpdateServlet(config, zoneManager)), "/update/*");
+        handlerServlets.addFilterWithMapping(new FilterHolder(new SecurityFilter(config.getPassword())), "/api/*", 0);
+
+        ServletContextHandler handlerServletsWithContext = new ServletContextHandler("/", false, false);
+        handlerServletsWithContext.setHandler(handlerServlets);
+
+        ResourceFactory resourceFactory = ResourceFactory.of(server);
+
+        // Own web resources (ctx handler is required so / will be forwarded not redirected to
+        // /index.html)
+        ResourceHandler handlerWeb = new ResourceHandler();
+        handlerWeb.setBaseResource(resourceFactory.newClassLoaderResource("/web"));
+        handlerWeb.setWelcomeFiles(new String[] {"index.html"});
+        ContextHandler ctxHandlerWeb = new ContextHandler("/");
+        ctxHandlerWeb.setHandler(handlerWeb);
+
+        // webkit resources
+        ResourceHandler handlerWebkit = new ResourceHandler();
+        handlerWebkit.setBaseResource(resourceFactory.newClassLoaderResource("/webkit"));
+
+        // Register all those handlers
+        server.setHandler(new Handler.Sequence(handlerServletsWithContext, ctxHandlerWeb, handlerWebkit));
+
+        try {
+            server.start();
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot start webserver. " + e.getMessage(), e);
+        }
     }
-  }
-
 }

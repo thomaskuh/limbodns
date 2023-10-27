@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{DEFAULT} [%-8.8t] %-5level %logger - %msg%n"/>
+        </Console>
+        <File name="File" fileName="${sys:envDataDir}/limbodns.log">
+            <PatternLayout pattern="%d{DEFAULT} [%-8.8t] %-5level %logger - %msg%n"/>
+        </File>
+    </Appenders>
+    <Loggers>
+        <Logger name="org.eclipse.jetty" level="warn" />
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="File"/>
+        </Root>
+    </Loggers>
+</Configuration>
