@@ -4,7 +4,7 @@ app.component('pageRecord', {
   controller: function(client) {
 	  var ctrl = this;
 	  
-	  ctrl.types = ["A", "AAAA", "CNAME"];
+	  ctrl.types = ["A", "AAAA", "CNAME", "MX", "TXT"];
 	  
 	  ctrl.zoneId = null;
 	  ctrl.recordId = null;

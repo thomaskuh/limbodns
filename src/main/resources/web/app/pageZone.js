@@ -4,7 +4,7 @@ app.component('pageZone', {
   controller: function(client) {
 	  var ctrl = this;
 	  
-	  ctrl.types = ["A", "AAAA", "CNAME"];
+	  ctrl.types = ["A", "AAAA", "CNAME", "MX", "TXT"];
 	  
 	  ctrl.zoneId = null;
 	  ctrl.zone = null;
@@ -65,6 +65,14 @@ app.component('pageZone', {
 		 else if('AAAA' == ctrl.recordNew.type) {
 			 ctrl.recordNew.value = '0:0:0:0:0:0:0:1';
 		 }
+		 else if('MX' == ctrl.recordNew.type) {
+             ctrl.recordNew.token = '';
+             ctrl.recordNew.value = 'mailserver.example.org.';
+         }
+         else if('TXT' == ctrl.recordNew.type) {
+             ctrl.recordNew.token = '';
+             ctrl.recordNew.value = 'some random text';
+         }
 	  };
 	  
   }

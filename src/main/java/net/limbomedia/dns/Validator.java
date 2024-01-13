@@ -15,13 +15,15 @@ import org.xbill.DNS.TextParseException;
 
 public class Validator {
 
-    private static final String REGEX_ABSOLUTE_NAME = "[a-zA-Z0-9\\-\\.]{1,255}\\.";
-    private static final String REGEX_RELATIVE_NAME = "[a-zA-Z0-9\\-\\.@\\*]{1,255}";
+    private static final String REGEX_ABSOLUTE_NAME = "[a-zA-Z0-9_\\-\\.]{1,255}\\.";
+    private static final String REGEX_RELATIVE_NAME = "[a-zA-Z0-9_@\\-\\.\\*]{1,255}";
+    private static final String REGEX_TXT_VALUE = "[a-zA-Z0-9_@,/:;&\" \\+\\?\\=\\-\\.\\*]+";
     private static final String REGEX_TOKEN = "[a-zA-Z0-9\\-]{0,100}";
 
     // For absolute names like: zone name, nameserver, cname value.
     static Pattern PATTERN_ABSOLUTE_NAME = Pattern.compile("^" + REGEX_ABSOLUTE_NAME + "$");
     static Pattern PATTERN_RELATIVE_NAME = Pattern.compile("^" + REGEX_RELATIVE_NAME + "$");
+    static Pattern PATTERN_TXT_VALUE = Pattern.compile("^" + REGEX_TXT_VALUE + "$");
     static Pattern PATTERN_TOKEN = Pattern.compile("^" + REGEX_TOKEN + "$");
 
     private static boolean isInvalidAbsoluteName(String value) {
@@ -51,6 +53,10 @@ public class Validator {
             return true;
         }
         return name.isAbsolute();
+    }
+
+    private static boolean isInvalidTxtValue(String value) {
+        return (value == null || !PATTERN_TXT_VALUE.matcher(value).matches());
     }
 
     public static void validateZone(XZone value, Collection<XZone> existingZones) {
@@ -159,6 +165,14 @@ public class Validator {
         } else if (XType.CNAME.equals(type)) {
             if (isInvalidAbsoluteName(value)) {
                 ve.withDetail(new ErrorDetail(ErrorMsg.VAL_DETAIL_RECORD_VALUE_CNAME_INVALID.key()));
+            }
+        } else if (XType.MX.equals(type)) {
+            if (isInvalidAbsoluteName(value)) {
+                ve.withDetail(new ErrorDetail(ErrorMsg.VAL_DETAIL_RECORD_VALUE_MX_INVALID.key()));
+            }
+        } else if (XType.TXT.equals(type)) {
+            if (isInvalidTxtValue(value)) {
+                ve.withDetail(new ErrorDetail(ErrorMsg.VAL_DETAIL_RECORD_VALUE_TXT_INVALID.key()));
             }
         } else if (value == null || value.contains(" ")) {
             ve.withDetail(new ErrorDetail(ErrorMsg.VAL_DETAIL_RECORD_VALUE_INVALID.key()));

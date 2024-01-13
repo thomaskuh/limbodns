@@ -22,10 +22,12 @@ import org.xbill.DNS.ARecord;
 import org.xbill.DNS.Address;
 import org.xbill.DNS.CNAMERecord;
 import org.xbill.DNS.DClass;
+import org.xbill.DNS.MXRecord;
 import org.xbill.DNS.NSRecord;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.SOARecord;
+import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.Zone;
 
 public class ZoneManagerImpl implements ZoneManager, ZoneProvider {
@@ -110,6 +112,16 @@ public class ZoneManagerImpl implements ZoneManager, ZoneProvider {
                     } else if (XType.CNAME.equals(xrec.getType())) {
                         r = new CNAMERecord(
                                 new Name(xrec.getName(), nameZone), DClass.IN, 300L, new Name(xrec.getValue()));
+                    } else if (XType.TXT.equals(xrec.getType())) {
+                        List<String> values = new ArrayList<>();
+                        for (int i = 0; i < xrec.getValue().length(); i += 255) {
+                            values.add(xrec.getValue()
+                                    .substring(i, Math.min(xrec.getValue().length(), i + 255)));
+                        }
+                        r = new TXTRecord(new Name(xrec.getName(), nameZone), DClass.IN, 300L, values);
+                    } else if (XType.MX.equals(xrec.getType())) {
+                        r = new MXRecord(
+                                new Name(xrec.getName(), nameZone), DClass.IN, 300L, 10, new Name(xrec.getValue()));
                     }
 
                     if (r == null) {

@@ -70,15 +70,17 @@
             "with_details": "An error with details and mainParam {{mainParam}}",
             "detail": {
                 "zone_name_exists": "Name already exists.",
-                "zone_name_invalid": "Name must be an absolute name ending with '.' and characters: 'a-zA-Z0-9-.'.",
-                "nameserver_invalid": "Nameserver must be an absolute name ending with '.' and characters: 'a-zA-Z0-9-.'.",
-                "record_name_invalid": "Name must be a relative name with characters: 'a-zA-Z0-9-.@*'.",
-                "record_type_invalid": "Type must be one of: 'A','AAAA','CNAME'.",
+                "zone_name_invalid": "Name must be an absolute name ending with '.' and characters: 'a-zA-Z0-9-_.'.",
+                "nameserver_invalid": "Nameserver must be an absolute name ending with '.' and characters: 'a-zA-Z0-9-_.'.",
+                "record_name_invalid": "Name must be a relative name with characters: 'a-zA-Z0-9-_.@*'.",
+                "record_type_invalid": "Type must be one of: 'A','AAAA','CNAME','MX','TXT'.",
                 "record_token_invalid": "Token only allows characters: 'a-zA-Z0-9-'.",
                 "value_invalid": "Value invalid.",
                 "record_value_a_invalid": "A value must a valid IPv4 address.",
                 "record_value_aaaa_invalid": "AAAA value must be a valid IPv6 address.",
-                "record_value_cname_invalid": "CNAME value must be an absolute name ending with '.' and characters: 'a-zA-Z0-9-.'.",
+                "record_value_cname_invalid": "CNAME value must be an absolute name ending with '.' and characters: 'a-zA-Z0-9-_.'.",
+                "record_value_mx_invalid": "MX value must be an absolute name ending with '.' and characters: 'a-zA-Z0-9-_.'.",
+                "record_value_txt_invalid": "TXT value only allows characters: 'a-zA-Z0-9-_@,/:;\"?=+. '.",
                 "record_name_conflict": "There's either one CNAME or multiple OTHER records allowed with the same name.",
                 "record_token_exists": "Same token cannot be used for multiple records with different types."
             }

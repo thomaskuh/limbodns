@@ -7,15 +7,16 @@ public enum ErrorMsg {
     VAL_DETAIL_ZONE_NAME_EXISTS("val.detail.zone_name_exists", "Name already exists."),
     VAL_DETAIL_ZONE_NAME_INVALID(
             "val.detail.zone_name_invalid",
-            "Name must be an absolute name ending with '.' and characters: 'a-zA-Z0-9-.'."),
+            "Name must be an absolute name ending with '.' and characters: 'a-zA-Z0-9-_.'."),
 
     VAL_DETAIL_NAMESERVER_INVALID(
             "val.detail.nameserver_invalid",
-            "Nameserver must be an absolute name ending with '.' and characters: 'a-zA-Z0-9-.'."),
+            "Nameserver must be an absolute name ending with '.' and characters: 'a-zA-Z0-9-_.'."),
 
     VAL_DETAIL_RECORD_NAME_INVALID(
-            "val.detail.record_name_invalid", "Name must be a relative name with characters: 'a-zA-Z0-9-.@*'."),
-    VAL_DETAIL_RECORD_TYPE_INVALID("val.detail.record_type_invalid", "Type must be one of: 'A','AAAA','CNAME'."),
+            "val.detail.record_name_invalid", "Name must be a relative name with characters: 'a-zA-Z0-9-_.@*'."),
+    VAL_DETAIL_RECORD_TYPE_INVALID(
+            "val.detail.record_type_invalid", "Type must be one of: 'A','AAAA','CNAME','MX','TXT'."),
 
     VAL_DETAIL_RECORD_TOKEN_INVALID("val.detail.record_token_invalid", "Token only allows characters: 'a-zA-Z0-9-'."),
     VAL_DETAIL_RECORD_VALUE_INVALID("val.detail.value_invalid", "Value invalid."),
@@ -24,7 +25,12 @@ public enum ErrorMsg {
             "val.detail.record_value_aaaa_invalid", "AAAA value must be a valid IPv6 address."),
     VAL_DETAIL_RECORD_VALUE_CNAME_INVALID(
             "val.detail.record_value_cname_invalid",
-            "CNAME value must be an absolute name ending with '.' and characters: 'a-zA-Z0-9-.'."),
+            "CNAME value must be an absolute name ending with '.' and characters: 'a-zA-Z0-9-_.'."),
+    VAL_DETAIL_RECORD_VALUE_MX_INVALID(
+            "val.detail.record_value_mx_invalid",
+            "MX value must be an absolute name ending with '.' and characters: 'a-zA-Z0-9-_.'."),
+    VAL_DETAIL_RECORD_VALUE_TXT_INVALID(
+            "val.detail.record_value_txt_invalid", "TXT value only allows characters: 'a-zA-Z0-9-_@,/:;\"?=+. '."),
     VAL_DETAIL_RECORD_NAME_CONFLICT(
             "val.detail.record_name_conflict",
             "There's either one CNAME or multiple OTHER records allowed with the same name."),
