@@ -1,7 +1,7 @@
-FROM alpine:3.18.4
+FROM alpine:3.19
 MAINTAINER LimboMedia <admin@limbomedia.net>
 
-RUN apk add --update --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing openjdk21-jre-headless
+RUN apk add --update --no-cache openjdk21-jre-headless
 
 ADD maven/limbodns-jar-with-dependencies.jar /limbodns.jar
 RUN mkdir data
