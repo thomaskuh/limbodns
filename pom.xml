@@ -10,12 +10,12 @@
 
     <groupId>net.limbomedia</groupId>
     <artifactId>limbodns</artifactId>
-    <version>5.7-SNAPSHOT</version>
+    <version>5.7</version>
 
     <scm>
         <connection>scm:git:git://github.com/thomaskuh/limbodns.git</connection>
         <developerConnection>scm:git:git@github.com:thomaskuh/limbodns.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>release/5.7</tag>
         <url>https://github.com/thomaskuh/limbodns</url>
     </scm>
 
