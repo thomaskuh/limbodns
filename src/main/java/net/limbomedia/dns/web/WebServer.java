@@ -1,6 +1,5 @@
 package net.limbomedia.dns.web;
 
-import java.util.concurrent.Executors;
 import net.limbomedia.dns.ZoneManager;
 import net.limbomedia.dns.model.Config;
 import org.apache.logging.log4j.LogManager;
@@ -13,10 +12,9 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.util.resource.ResourceFactory;
-import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.eclipse.jetty.util.thread.VirtualThreadPool;
 
 public class WebServer {
 
@@ -27,24 +25,17 @@ public class WebServer {
     public WebServer(Config config, ZoneManager zoneManager) {
         L.info("Starting webserver on port {}.", config.getPortHTTP());
 
-        // Jetty seems not yet that virtual thread ready because this guide-recommended
-        // construction still requires and uses a minimum of 3 real threads in that pool.
-        QueuedThreadPool threadPool = new QueuedThreadPool(3);
-        threadPool.setVirtualThreadsExecutor(Executors.newVirtualThreadPerTaskExecutor());
-        server = new Server(threadPool);
+        // Jetty server using named virtual threads via VirtualThreadPool.
+        // Check: https://jetty.org/docs/jetty/12/programming-guide/arch/threads.html#thread-pool-virtual-threads
+        VirtualThreadPool fredsPool = new VirtualThreadPool();
+        fredsPool.setName("j");
+        server = new Server(fredsPool);
 
         ServerConnector connector = new ServerConnector(server);
         connector.setPort(config.getPortHTTP());
         server.setConnectors(new Connector[] {connector});
 
-        /*
-         * Some strange things about Jetty and unhandled requests: They pass
-         * ResourceHandler BUT not for path / cause disabled directory listing leads to
-         * a 403 instead. They pass ServletHandler/ServletContextHandler but only if
-         * ensureDefaultServlet is disabled.
-         */
-
-        // Own servlets
+        // API servlets and filters
         ServletHandler handlerServlets = new ServletHandler();
         handlerServlets.setEnsureDefaultServlet(false);
         handlerServlets.addFilterWithMapping(new FilterHolder(new SecurityFilter(config.getPassword())), "/admin/*", 0);
@@ -53,28 +44,25 @@ public class WebServer {
                 new ServletHolder(new ServletApiSimple(config, zoneManager)), "/api/simple/*");
         handlerServlets.addServletWithMapping(
                 new ServletHolder(new ServletApiLego(config, zoneManager)), "/api/lego/*");
-
         handlerServlets.addServletWithMapping(new ServletHolder(new UpdateServlet(config, zoneManager)), "/update/*");
 
         ServletContextHandler handlerServletsWithContext = new ServletContextHandler("/", false, false);
         handlerServletsWithContext.setHandler(handlerServlets);
 
+        // Static resources from classpath (own and tk-lib-webkit)
         ResourceFactory resourceFactory = ResourceFactory.of(server);
 
-        // Own web resources (ctx handler is required so / will be forwarded not redirected to
-        // /index.html)
-        ResourceHandler handlerWeb = new ResourceHandler();
-        handlerWeb.setBaseResource(resourceFactory.newClassLoaderResource("/web"));
-        handlerWeb.setWelcomeFiles(new String[] {"index.html"});
-        ContextHandler ctxHandlerWeb = new ContextHandler("/");
-        ctxHandlerWeb.setHandler(handlerWeb);
+        ResourceHandler handlerResourcesWebOwn = new ResourceHandler();
+        handlerResourcesWebOwn.setBaseResource(resourceFactory.newClassLoaderResource("/web", false));
+        handlerResourcesWebOwn.setDirAllowed(false);
 
-        // webkit resources
-        ResourceHandler handlerWebkit = new ResourceHandler();
-        handlerWebkit.setBaseResource(resourceFactory.newClassLoaderResource("/webkit"));
+        ResourceHandler handlerResourcesWebKit = new ResourceHandler();
+        handlerResourcesWebKit.setDirAllowed(false);
+        handlerResourcesWebKit.setBaseResource(resourceFactory.newClassLoaderResource("/webkit", false));
 
         // Register all those handlers
-        server.setHandler(new Handler.Sequence(handlerServletsWithContext, ctxHandlerWeb, handlerWebkit));
+        server.setHandler(
+                new Handler.Sequence(handlerServletsWithContext, handlerResourcesWebOwn, handlerResourcesWebKit));
 
         try {
             server.start();

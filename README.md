@@ -113,7 +113,7 @@ HTTPREQ_PASSWORD=secrettoken <-- This is the token defined above in LimboDNS
       - traefik.http.routers.myservice-https.tls=true
       - traefik.http.routers.myservice-https.tls.certresolver=ledns
       - traefik.http.routers.myservice-https.tls.domains[0].main=*.example.com
-      - traefik.http.routers.myservice-https.tls.domains[0].sans=www.example.com
+      - traefik.http.routers.myservice-https.tls.domains[0].sans=example.com
 ```
 
 

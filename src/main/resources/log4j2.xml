@@ -12,6 +12,8 @@
     </Appenders>
     <Loggers>
         <Logger name="org.eclipse.jetty" level="warn" />
+        <!-- Suppress "Base Resource should not be an alias" warnings. Don't know why this is a problem. -->
+        <Logger name="org.eclipse.jetty.server.handler.ResourceHandler" level="error" />
         <Root level="info">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="File"/>
