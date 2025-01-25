@@ -21,8 +21,14 @@ app.component('pageZone', {
 			  ctrl.recordEdit = null;
 		  });
 	  };
-
+      
+	  ctrl.safeTtl = function(val) {
+		var ttl = parseInt(val);
+		return (ttl == NaN || ttl < 0) ? null : ttl;
+	  };
+	  
 	  ctrl.recordCreate = function() {
+		ctrl.recordNew.ttl = ctrl.safeTtl(ctrl.recordNew.ttl);
 		  client.recordCreate(ctrl.zoneId, ctrl.recordNew).then((resp) => {
         ctrl.zone.records.push(resp.data);
       });
@@ -36,6 +42,7 @@ app.component('pageZone', {
     };
 
 	  ctrl.recordSave = function(val) {
+		val.ttl = ctrl.safeTtl(val.ttl);
 		  client.recordUpdate(ctrl.zoneId, val.id, val).then((resp) => {
         var idx = ctrl.zone.records.indexOf(val);
         ctrl.zone.records[idx] = resp.data;

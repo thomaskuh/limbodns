@@ -97,31 +97,32 @@ public class ZoneManagerImpl implements ZoneManager, ZoneProvider {
             for (XRecord xrec : xzone.getRecords()) {
                 try {
                     Record r = null;
+                    long ttl = xrec.getTtl() == null ? 300L : xrec.getTtl();
                     if (XType.A.equals(xrec.getType())) {
                         r = new ARecord(
                                 new Name(xrec.getName(), nameZone),
                                 DClass.IN,
-                                300L,
+                                ttl,
                                 Address.getByAddress(xrec.getValue()));
                     } else if (XType.AAAA.equals(xrec.getType())) {
                         r = new AAAARecord(
                                 new Name(xrec.getName(), nameZone),
                                 DClass.IN,
-                                300L,
+                                ttl,
                                 Address.getByAddress(xrec.getValue()));
                     } else if (XType.CNAME.equals(xrec.getType())) {
                         r = new CNAMERecord(
-                                new Name(xrec.getName(), nameZone), DClass.IN, 300L, new Name(xrec.getValue()));
+                                new Name(xrec.getName(), nameZone), DClass.IN, ttl, new Name(xrec.getValue()));
                     } else if (XType.TXT.equals(xrec.getType())) {
                         List<String> values = new ArrayList<>();
                         for (int i = 0; i < xrec.getValue().length(); i += 255) {
                             values.add(xrec.getValue()
                                     .substring(i, Math.min(xrec.getValue().length(), i + 255)));
                         }
-                        r = new TXTRecord(new Name(xrec.getName(), nameZone), DClass.IN, 300L, values);
+                        r = new TXTRecord(new Name(xrec.getName(), nameZone), DClass.IN, ttl, values);
                     } else if (XType.MX.equals(xrec.getType())) {
                         r = new MXRecord(
-                                new Name(xrec.getName(), nameZone), DClass.IN, 300L, 10, new Name(xrec.getValue()));
+                                new Name(xrec.getName(), nameZone), DClass.IN, ttl, 10, new Name(xrec.getValue()));
                     }
 
                     if (r == null) {
@@ -243,7 +244,8 @@ public class ZoneManagerImpl implements ZoneManager, ZoneProvider {
             record.setValue(body.getValue());
             record.setLastChange(new Date());
             record.setToken(body.getToken());
-
+            record.setTtl((body.getTtl() == null || body.getTtl() < 0) ? null : body.getTtl());
+            
             zone.addRecord(record);
             zone.incrementSerial();
 
@@ -283,6 +285,7 @@ public class ZoneManagerImpl implements ZoneManager, ZoneProvider {
 
             // Save changes, increment zone-serial, store as file and update zones.
             record.setToken(body.getToken());
+            record.setTtl((body.getTtl() == null || body.getTtl() < 0) ? null : body.getTtl());
             if (!record.getValue().equals(body.getValue())) {
                 record.setValue(body.getValue());
                 record.setLastChange(new Date());

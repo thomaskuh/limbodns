@@ -15,6 +15,7 @@ public class XRecord implements Serializable {
     private Date lastChange;
     private Date lastUpdate;
     private String token;
+    private Long ttl;
 
     @JsonIgnore
     private transient XZone zone;
@@ -82,7 +83,15 @@ public class XRecord implements Serializable {
     public void setToken(String token) {
         this.token = token;
     }
-
+    
+    public Long getTtl() {
+		return ttl;
+	}
+    
+    public void setTtl(Long ttl) {
+		this.ttl = ttl;
+	}
+    
     @Override
     public String toString() {
         return "XRecord [id="
@@ -91,6 +100,8 @@ public class XRecord implements Serializable {
                 + token
                 + ", name="
                 + name
+                + ", ttl="
+                + ttl
                 + ", type="
                 + type
                 + ", value="

@@ -34,6 +34,7 @@
         "RR_NAME": "Name",
         "RR_TYPE": "Type",
         "RR_DATE": "Last change/update",
+        "RR_TTL": "TTL",
         "RR_TOKEN": "DynDNS Update Token",
         "RR_VALUE": "Value",
         "TOKENGEN": "Generate token"

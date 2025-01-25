@@ -5,8 +5,9 @@
   <thead>
     <tr>
       <th>{{'ZONE.RR_NAME'|translate}}</th>
-      <th>{{'ZONE.RR_TYPE'|translate}}</th>
+      <th style="width: 120px;">{{'ZONE.RR_TYPE'|translate}}</th>
       <th>{{'ZONE.RR_DATE'|translate}}</th>
+      <th style="width: 100px;">{{'ZONE.RR_TTL'|translate}}</th>
       <th>{{'ZONE.RR_TOKEN'|translate}}</th>
       <th>{{'ZONE.RR_VALUE'|translate}}</th>
       <th>
@@ -20,12 +21,14 @@
     <td>NS</td>
     <td></td>
     <td></td>
+    <td></td>
     <td><input type="text" class="input" value="{{$ctrl.zone.nameserver}}" disabled="disabled" /></td>
     <td>{{'GEN.GENERATED'|translate}}</td>
   </tr>
   <tr>
     <td>{{$ctrl.zone.name}}</td>
     <td>SOA</td>
+    <td></td>
     <td></td>
     <td></td>
     <td><input type="text" class="input" value="{{$ctrl.zone.nameserver}} {{'hostmaster.' + $ctrl.zone.nameserver}} {{$ctrl.zone.serial}} 21600 7200 2160000 3600" disabled="disabled" /></td>
@@ -39,6 +42,9 @@
       {{rec.lastChange | date:'yyyy-MM-dd HH:mm:ss'}}<br/>
       <small ng-if="!rec.lastUpdate">N/A</small>
       <small ng-if="rec.lastUpdate">{{rec.lastUpdate | date:'yyyy-MM-dd HH:mm:ss'}}</small>
+    </td>
+    <td>
+      <input type="text" class="input" ng-model="rec.ttl" ng-change="rec.dirty = true" placeholder="300" />  
     </td>
     <td>
       <div ng-if="rec.type == 'A' || rec.type == 'AAAA'" class="field has-addons">
@@ -58,6 +64,9 @@
     <td><input type="text" class="input" ng-model="$ctrl.recordNew.name"></td>
     <td><div class="select"><select ng-model="$ctrl.recordNew.type" ng-options="type for type in $ctrl.types" ng-change="$ctrl.recordNewChanged()"></select></div></td>
     <td></td>
+    <td>
+      <input type="text" class="input" ng-model="$ctrl.recordNew.ttl" placeholder="300" />
+    </td>    
     <td>
       <div ng-if="$ctrl.recordNew.type == 'A' || $ctrl.recordNew.type == 'AAAA'" class="field has-addons">
         <div class="control is-expanded"><input type="text" class="input" ng-model="$ctrl.recordNew.token" ng-change="rec.dirty = true" /></div>
