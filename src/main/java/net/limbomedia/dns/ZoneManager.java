@@ -24,5 +24,5 @@ public interface ZoneManager {
 
     public XRecord recordUpdate(String whoDidIt, String zoneId, String recordId, XRecord body);
 
-    public List<UpdateResult> recordDynDNS(String whoDidIt, String recordToken, String value);
+    public List<UpdateResult> recordDynDNS(String whoDidIt, String recordToken, String fqdn, String value);
 }

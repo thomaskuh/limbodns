@@ -51,6 +51,9 @@ public class WebServer {
         handlerServlets.addServletWithMapping(new ServletHolder(new ServletAdmin(config, zoneManager)), "/admin/*");
         handlerServlets.addServletWithMapping(
                 new ServletHolder(new ServletApiSimple(config, zoneManager)), "/api/simple/*");
+        handlerServlets.addServletWithMapping(
+                new ServletHolder(new ServletApiLego(config, zoneManager)), "/api/lego/*");
+
         handlerServlets.addServletWithMapping(new ServletHolder(new UpdateServlet(config, zoneManager)), "/update/*");
 
         ServletContextHandler handlerServletsWithContext = new ServletContextHandler("/", false, false);

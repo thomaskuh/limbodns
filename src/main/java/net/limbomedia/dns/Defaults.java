@@ -63,6 +63,14 @@ public class Defaults {
         r.setValue("www.example.com.");
         zone.getRecords().add(r);
 
+        r = new XRecord();
+        r.setId(UUID.randomUUID().toString());
+        r.setName("_acme-challenge");
+        r.setType(XType.TXT);
+        r.setLastChange(new Date());
+        r.setValue("for_lets_encrypt_acme_dns_challenge");
+        zone.getRecords().add(r);
+
         result.add(zone);
 
         return result;

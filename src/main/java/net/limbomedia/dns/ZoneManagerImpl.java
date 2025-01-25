@@ -307,20 +307,39 @@ public class ZoneManagerImpl implements ZoneManager, ZoneProvider {
     }
 
     @Override
-    public List<UpdateResult> recordDynDNS(String whoDidIt, String recordToken, String value) {
+    public List<UpdateResult> recordDynDNS(String whoDidIt, String recordToken, String fqdn, String value) {
         lock.lock();
         try {
             List<XRecord> records = getRecordsByToken(recordToken);
             if (records.isEmpty()) {
                 if (log) {
                     L.info(
-                            "Value updates failed. Unknown token. By: {}, Token: {}, Value: {}.",
+                            "Value updates failed. No records for token. By: {}, Token: {}, Value: {}, Fqdn: {}.",
                             whoDidIt,
                             recordToken,
-                            value);
+                            value,
+                            fqdn);
                 }
 
                 throw new NotFoundException();
+            }
+
+            if (fqdn != null) {
+                records = records.stream()
+                        .filter(rec -> (rec.getName() + "." + rec.getZone().getName()).equals(fqdn))
+                        .collect(Collectors.toList());
+                if (records.isEmpty()) {
+                    if (log) {
+                        L.info(
+                                "Value updates failed. No records matching token and fqdn. By: {}, Token: {}, Value: {}, Fqdn: {}.",
+                                whoDidIt,
+                                recordToken,
+                                value,
+                                fqdn);
+                    }
+
+                    throw new NotFoundException();
+                }
             }
 
             List<UpdateResult> results = new ArrayList<UpdateResult>();

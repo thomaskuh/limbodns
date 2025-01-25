@@ -40,7 +40,7 @@ public class UpdateServlet extends ServletGeneric {
             value = remoteAddress;
         }
 
-        List<UpdateResult> result = zoneManager.recordDynDNS(remoteAddress, token, value);
+        List<UpdateResult> result = zoneManager.recordDynDNS(remoteAddress, token, null, value);
         mapper.writeValue(resp.getOutputStream(), result);
 
         return true;
