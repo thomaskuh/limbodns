@@ -83,15 +83,15 @@ public class XRecord implements Serializable {
     public void setToken(String token) {
         this.token = token;
     }
-    
+
     public Long getTtl() {
-		return ttl;
-	}
-    
+        return ttl;
+    }
+
     public void setTtl(Long ttl) {
-		this.ttl = ttl;
-	}
-    
+        this.ttl = ttl;
+    }
+
     @Override
     public String toString() {
         return "XRecord [id="

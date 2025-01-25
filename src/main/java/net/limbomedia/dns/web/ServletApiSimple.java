@@ -11,15 +11,15 @@ import net.limbomedia.dns.model.Config;
 import net.limbomedia.dns.model.UpdateResult;
 import org.kuhlins.lib.webkit.HttpUtils;
 
-public class UpdateServlet extends ServletGeneric {
+public class ServletApiSimple extends ServletGeneric {
 
     private static final long serialVersionUID = 1L;
     private ZoneManager zoneManager;
     private Config config;
 
-    private static Pattern PATTERN_UPDATE = Pattern.compile("^/(?<token>[a-zA-Z0-9\\-]+)/?(?<val>.*)?$");
+    private static Pattern PATTERN_UPDATE = Pattern.compile("^/(?<token>[a-zA-Z0-9\\-]+)/(?<val>.*)?$");
 
-    public UpdateServlet(Config config, ZoneManager zoneManager) {
+    public ServletApiSimple(Config config, ZoneManager zoneManager) {
         this.config = config;
         this.zoneManager = zoneManager;
         handlers.add(this::handleUpdate);

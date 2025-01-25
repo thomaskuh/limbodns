@@ -2,7 +2,6 @@ package net.limbomedia.dns;
 
 import java.net.UnknownHostException;
 import java.util.Collection;
-import java.util.List;
 import java.util.regex.Pattern;
 import net.limbomedia.dns.model.XRecord;
 import net.limbomedia.dns.model.XType;
@@ -93,11 +92,6 @@ public class Validator {
         ve.throwOnDetails();
 
         validateRecordNameConflicts(ve, record, targetZone);
-
-        if (record.getToken() != null && !record.getToken().isEmpty()) {
-            validateRecordTokenConflicts(ve, existingZones, record.getType(), record.getToken());
-        }
-
         ve.throwOnDetails();
     }
 
@@ -109,13 +103,6 @@ public class Validator {
             ve.withDetail(new ErrorDetail(ErrorMsg.VAL_DETAIL_RECORD_TOKEN_INVALID.key()));
         }
         validateRecordValue(ve, record.getType(), record.getValue());
-        ve.throwOnDetails();
-
-        if (record.getToken() != null
-                && !record.getToken().isEmpty()
-                && !record.getToken().equals(targetRecord.getToken())) {
-            validateRecordTokenConflicts(ve, existingZones, targetRecord.getType(), record.getToken());
-        }
         ve.throwOnDetails();
     }
 
@@ -138,44 +125,41 @@ public class Validator {
         }
     }
 
-    private static void validateRecordTokenConflicts(
-            ValidationException ve, Collection<XZone> existingZones, XType type, String token) {
-        if (existingZones.stream()
-                .map(XZone::getRecords)
-                .flatMap(List::stream)
-                .filter(x -> !type.equals(x.getType()))
-                .anyMatch(x -> token.equals(x.getToken()))) {
-            ve.withDetail(new ErrorDetail(ErrorMsg.VAL_DETAIL_RECORD_TOKEN_EXISTS.key()));
+    private static void validateRecordValue(ValidationException ve, XType type, String value) {
+        ErrorMsg errorMsg = validateRecordValueSimple(type, value);
+        if (errorMsg != null) {
+            ve.withDetail(new ErrorDetail(errorMsg.key()));
         }
     }
 
-    private static void validateRecordValue(ValidationException ve, XType type, String value) {
+    public static ErrorMsg validateRecordValueSimple(XType type, String value) {
         if (XType.A.equals(type)) {
             try {
                 Address.getByAddress(value, Address.IPv4);
             } catch (UnknownHostException | NullPointerException e) {
-                ve.withDetail(new ErrorDetail(ErrorMsg.VAL_DETAIL_RECORD_VALUE_A_INVALID.key()));
+                return ErrorMsg.VAL_DETAIL_RECORD_VALUE_A_INVALID;
             }
         } else if (XType.AAAA.equals(type)) {
             try {
                 Address.getByAddress(value, Address.IPv6);
             } catch (UnknownHostException | NullPointerException e) {
-                ve.withDetail(new ErrorDetail(ErrorMsg.VAL_DETAIL_RECORD_VALUE_AAAA_INVALID.key()));
+                return ErrorMsg.VAL_DETAIL_RECORD_VALUE_AAAA_INVALID;
             }
         } else if (XType.CNAME.equals(type)) {
             if (isInvalidAbsoluteName(value)) {
-                ve.withDetail(new ErrorDetail(ErrorMsg.VAL_DETAIL_RECORD_VALUE_CNAME_INVALID.key()));
+                return ErrorMsg.VAL_DETAIL_RECORD_VALUE_CNAME_INVALID;
             }
         } else if (XType.MX.equals(type)) {
             if (isInvalidAbsoluteName(value)) {
-                ve.withDetail(new ErrorDetail(ErrorMsg.VAL_DETAIL_RECORD_VALUE_MX_INVALID.key()));
+                return ErrorMsg.VAL_DETAIL_RECORD_VALUE_MX_INVALID;
             }
         } else if (XType.TXT.equals(type)) {
             if (isInvalidTxtValue(value)) {
-                ve.withDetail(new ErrorDetail(ErrorMsg.VAL_DETAIL_RECORD_VALUE_TXT_INVALID.key()));
+                return ErrorMsg.VAL_DETAIL_RECORD_VALUE_TXT_INVALID;
             }
         } else if (value == null || value.contains(" ")) {
-            ve.withDetail(new ErrorDetail(ErrorMsg.VAL_DETAIL_RECORD_VALUE_INVALID.key()));
+            return ErrorMsg.VAL_DETAIL_RECORD_VALUE_INVALID;
         }
+        return null;
     }
 }

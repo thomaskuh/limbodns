@@ -11,15 +11,31 @@
 	<br/>
 </div>
 
-<div ng-if="$ctrl.record.token">
-	<h4 class="title is-4">{{'RECORD.KNOWN_TITLE'|translate}}</h4>
-	<article class="message"><div class="message-body">{{$ctrl.uurl.manu}}</div></article>
-	
-	
-	<h4 class="title is-4">{{'RECORD.UNKNOWN_TITLE'|translate}}</h4>
-	<article class="message"><div class="message-body">{{$ctrl.uurl.auto}}</div></article>
-	<p>{{'RECORD.UNKNOWN_HINT'|translate}}</p><br/>
-	
-	<h4 class="title is-4">{{'RECORD.WGET_TITLE'|translate}}</h4>
-	<article class="message"><div class="message-body">{{$ctrl.uurl.wget}}</div></article>
+<div>
+	<h4 class="title is-4">{{'RECORD.API_SIMPLE_TITLE'|translate}}</h4>
+	<p>{{'RECORD.API_SIMPLE_DESC'|translate}}</p>
+	<article class="message">
+		<div class="message-body">
+		<span ng-if="$ctrl.record.type == 'A' || $ctrl.record.type == 'AAAA'">
+	    # {{'RECORD.API_SIMPLE_BODY1'|translate}}<br/>
+	    {{$ctrl.url}}/simple/{{$ctrl.token}}/<br/><br/>
+	    </span>
+	    
+	    # {{'RECORD.API_SIMPLE_BODY2'|translate}}<br/>
+	    {{$ctrl.url}}/simple/{{$ctrl.token}}/{{$ctrl.simpleValue}}<br/><br/>
+	    
+		<span ng-if="$ctrl.record.type == 'A' || $ctrl.record.type == 'AAAA'">
+	    # {{'RECORD.API_SIMPLE_BODY3'|translate}}<br/>
+	    {{$ctrl.url}}/simple/{{$ctrl.token}}/127.0.0.1,2001:0db8:85a3:0000:0000:8a2e:0370:7334<br/><br/>
+	    </span>
+	    
+	    # {{'RECORD.API_GEN_EXAMPLES'|translate}}<br/>
+	    wget --inet4-only -qO - {{$ctrl.url}}/simple/{{$ctrl.token}}/{{$ctrl.simpleSuffix}}<br/>
+	    wget --inet6-only -qO - {{$ctrl.url}}/simple/{{$ctrl.token}}/{{$ctrl.simpleSuffix}}<br/>
+	    curl -4 {{$ctrl.url}}/simple/{{$ctrl.token}}/{{$ctrl.simpleSuffix}}<br/>
+	    curl -6 {{$ctrl.url}}/simple/{{$ctrl.token}}/{{$ctrl.simpleSuffix}}
+		</div>
+	</article>
+
+
 </div>

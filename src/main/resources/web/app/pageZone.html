@@ -47,14 +47,14 @@
       <input type="text" class="input" ng-model="rec.ttl" ng-change="rec.dirty = true" placeholder="300" />  
     </td>
     <td>
-      <div ng-if="rec.type == 'A' || rec.type == 'AAAA'" class="field has-addons">
+      <div class="field has-addons">
         <div class="control is-expanded"><input type="text" class="input" ng-model="rec.token" ng-change="rec.dirty = true" /></div>
         <div class="control"><button ng-click="$ctrl.generateToken(rec)" class="button" title="{{'ZONE.TOKENGEN'|translate}}"><i class="fas fa-magic"></i></button></div>
       </div>
     </td>
     <td><input type="text" class="input" ng-model="rec.value" ng-change="rec.dirty = true" /></td>
     <td>
-      <a ng-if="!rec.dirty && (rec.type == 'A' || rec.type == 'AAAA')" href="#/zone/{{$ctrl.zone.name}}/{{rec.id}}" class="button is-link" title="{{'RECORD.TITLE'|translate}}"><i class="fas fa-info"></i></a>    
+      <a ng-if="!rec.dirty" href="#/zone/{{$ctrl.zone.name}}/{{rec.id}}" class="button is-link" title="{{'RECORD.TITLE'|translate}}"><i class="fas fa-info"></i></a>    
       <button ng-if="rec.dirty"  ng-click="$ctrl.recordUndo(rec)" class="button"><i class="fas fa-undo">&nbsp;</i>{{'GEN.UNDO'|translate}}</button>
       <button ng-if="rec.dirty"  ng-click="$ctrl.recordSave(rec)" class="button is-success"><i class="fas fa-save">&nbsp;</i>{{'GEN.SAVE'|translate}}</button>
       <button ng-if="!rec.dirty" ng-click="$ctrl.recordDelete(rec)" class="button is-danger"><i class="fas fa-trash">&nbsp;</i>{{'GEN.DELETE'|translate}}</button>
@@ -68,7 +68,7 @@
       <input type="text" class="input" ng-model="$ctrl.recordNew.ttl" placeholder="300" />
     </td>    
     <td>
-      <div ng-if="$ctrl.recordNew.type == 'A' || $ctrl.recordNew.type == 'AAAA'" class="field has-addons">
+      <div class="field has-addons">
         <div class="control is-expanded"><input type="text" class="input" ng-model="$ctrl.recordNew.token" ng-change="rec.dirty = true" /></div>
         <div class="control"><button ng-click="$ctrl.generateToken($ctrl.recordNew)" class="button" title="{{'ZONE.TOKENGEN'|translate}}"><i class="fas fa-magic"></i></button></div>
       </div>

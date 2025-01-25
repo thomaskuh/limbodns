@@ -1,16 +1,16 @@
-var app = tkDefaultApp({authRouteAfterLogout: ['Login']});
+var app = tkDefaultApp({authRouteAfterLogout: ['Login'], authUrlProbe: '/admin/probe'});
 
 app.factory('client', ['$http', function($http) {
 	return {
-		probe: () => $http.get('/api/probe'),
-		zoneGets: () => $http.get('/api/zones'),
-		zoneGet: (id) => $http.get('/api/zone/' + id),
-		zoneCreate: (body) => $http.post('/api/zone', body),
-		zoneDelete: (id) => $http.delete('/api/zone/' + id),
-		recordGet: (zoneId, recordId) => $http.get('/api/zone/' + zoneId + '/record/' + recordId),
-		recordCreate: (zoneId, body) => $http.post('/api/zone/' + zoneId + '/record', body),
-		recordDelete: (zoneId, recordId) => $http.delete('/api/zone/' + zoneId + '/record/' + recordId),
-		recordUpdate: (zoneId, recordId, body) => $http.post('/api/zone/' + zoneId + '/record/' + recordId, body)
+		probe: () => $http.get('/admin/probe'),
+		zoneGets: () => $http.get('/admin/zones'),
+		zoneGet: (id) => $http.get('/admin/zone/' + id),
+		zoneCreate: (body) => $http.post('/admin/zone', body),
+		zoneDelete: (id) => $http.delete('/admin/zone/' + id),
+		recordGet: (zoneId, recordId) => $http.get('/admin/zone/' + zoneId + '/record/' + recordId),
+		recordCreate: (zoneId, body) => $http.post('/admin/zone/' + zoneId + '/record', body),
+		recordDelete: (zoneId, recordId) => $http.delete('/admin/zone/' + zoneId + '/record/' + recordId),
+		recordUpdate: (zoneId, recordId, body) => $http.post('/admin/zone/' + zoneId + '/record/' + recordId, body)
 	}
 }]);
 

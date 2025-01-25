@@ -44,9 +44,22 @@ public class ServletGeneric extends HttpServlet {
             }
             if (!handeled) {
                 L.debug("No handler found for: {}.", req.getPathInfo());
+                resp.sendError(404);
             }
         } catch (Exception e) {
             exceptionizer.handleException(e, resp);
         }
+    }
+
+    /**
+     * Return request path without the mapped prefix like HttpServletRequest.getPathInfo(),
+     * but null-safe because when servlet is mapped to "/something/*" but only "/something"
+     * (without trailing slash) has been called, getPathInfo() would return null instead of
+     * an empty string.
+     * @param req
+     * @return
+     */
+    protected String path(HttpServletRequest req) {
+        return req.getPathInfo() == null ? "" : req.getPathInfo();
     }
 }

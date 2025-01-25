@@ -2,6 +2,7 @@ package net.limbomedia.dns;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -245,7 +246,7 @@ public class ZoneManagerImpl implements ZoneManager, ZoneProvider {
             record.setLastChange(new Date());
             record.setToken(body.getToken());
             record.setTtl((body.getTtl() == null || body.getTtl() < 0) ? null : body.getTtl());
-            
+
             zone.addRecord(record);
             zone.incrementSerial();
 
@@ -311,21 +312,45 @@ public class ZoneManagerImpl implements ZoneManager, ZoneProvider {
         try {
             List<XRecord> records = getRecordsByToken(recordToken);
             if (records.isEmpty()) {
+                if (log) {
+                    L.info(
+                            "Value updates failed. Unknown token. By: {}, Token: {}, Value: {}.",
+                            whoDidIt,
+                            recordToken,
+                            value);
+                }
+
                 throw new NotFoundException();
             }
 
-            // All records with same token must have same type, so we check first to match
-            // incoming value
-            Validator.validateRecordValue(records.get(0).getType(), value);
+            List<UpdateResult> results = new ArrayList<UpdateResult>();
 
-            List<UpdateResult> result =
-                    records.stream().map(x -> recordDynDNS(whoDidIt, x, value)).collect(Collectors.toList());
+            for (XRecord rec : records) {
+                String valueExtracted = value;
+                if (XType.A == rec.getType()) {
+                    valueExtracted = Arrays.stream(value.split(","))
+                            .map(adr -> adr.replaceAll("[ \\[\\]]", ""))
+                            .filter(adr -> Address.toArray(adr, Address.IPv4) != null)
+                            .findFirst()
+                            .orElse(valueExtracted);
+                }
+                if (XType.AAAA == rec.getType()) {
+                    valueExtracted = Arrays.stream(value.split(","))
+                            .map(adr -> adr.replaceAll("[ \\[\\]]", ""))
+                            .filter(adr -> Address.toArray(adr, Address.IPv6) != null)
+                            .findFirst()
+                            .orElse(valueExtracted);
+                }
 
-            if (result.stream().anyMatch(UpdateResult::isChanged)) {
+                UpdateResult updateResult = recordDynDNS(whoDidIt, rec, valueExtracted);
+                results.add(updateResult);
+            }
+
+            if (results.stream().anyMatch(UpdateResult::isChanged)) {
                 onChange();
             }
 
-            return result;
+            return results;
         } finally {
             lock.unlock();
         }
@@ -335,21 +360,22 @@ public class ZoneManagerImpl implements ZoneManager, ZoneProvider {
         UpdateResult result = new UpdateResult(
                 record.getZone().getName(), record.getName(), record.getType().name(), false, value);
 
-        Date now = new Date();
-        record.setLastUpdate(now);
+        ErrorMsg errorMsg = Validator.validateRecordValueSimple(record.getType(), value);
+        if (errorMsg == null) {
+            Date now = new Date();
+            record.setLastUpdate(now);
 
-        if (!record.getValue().equals(value)) {
-            result.setChanged(true);
-            record.setValue(value);
-            record.setLastChange(now);
+            if (!record.getValue().equals(value)) {
+                result.setChanged(true);
+                record.setValue(value);
+                record.setLastChange(now);
+            }
+        } else {
+            result.setError("Invalid value: " + errorMsg.text());
         }
+
         if (log) {
-            L.info(
-                    "Value updated ({}). By: {}, Zone: {}, {}.",
-                    result.isChanged() ? "change" : "same",
-                    whoDidIt,
-                    record.getZone().getName(),
-                    record);
+            L.info("Value updated. By: {}, {}, Value: {}.", whoDidIt, result, value);
         }
 
         return result;

@@ -39,11 +39,7 @@ public class MonitorUDP extends Monitor {
                 socket.receive(packet);
                 executorService.execute(new RunnerUDP(resolver, socket, packet, log));
             } catch (Exception e) {
-                L.warn(
-                        "UDP Socket error: {} -> {}.",
-                        e.getClass().getSimpleName(),
-                        e.getMessage(),
-                        L.isDebugEnabled() ? e : null);
+                L.warn("UDP Socket error: {} -> {}.", e.getClass().getSimpleName(), e.getMessage(), e);
             }
         }
 

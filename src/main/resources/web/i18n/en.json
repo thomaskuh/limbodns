@@ -42,12 +42,14 @@
     "RECORD": {
         "TITLE": "DynDNS Update Instructions",
         "SUBTITLE": "for {{type}} record: ",
-        "KNOWN_TITLE": "Clients knowing their own IP send a HTTP GET like this:",
-        "UNKNOWN_TITLE": "For IP auto-detection simply omit the IP:",
-        "UNKNOWN_HINT": "Note: Auto-update will only work if the caller uses the same IP protocol as the record that should be updated, especially if both nameserver and client support IPv4 AND IPv6.",
-        "WGET_TITLE": "Wget users simply force the right protocol:",
         "NO_TOKEN": "No token specified!",
-        "NO_TOKEN_HINT": "To use the DynDNS feature you need to set a token for your record. The token is your unique identifier and password, so choose a proper length."
+        "NO_TOKEN_HINT": "To use the DynDNS feature you need to set a token for your record. The token is your unique identifier and password, so choose a proper length.",
+        "API_GEN_EXAMPLES": "Wget and cUrl examples (with forced IP protocol version):",
+        "API_SIMPLE_TITLE": "LimboDNS Simple API",
+        "API_SIMPLE_DESC": "This as-simple-as-possible HTTP API has everything you need straight in the URL. No headers, no parameters, no json, no body ... just the URL, get or post. Simply make a HTTP call like this:",
+        "API_SIMPLE_BODY1": "Update with autodetected aka the clients IP (Note that this might cause trouble on dual-stack IPv4+IPv6 setups):",
+        "API_SIMPLE_BODY2": "Update with IP/value specified:",
+        "API_SIMPLE_BODY3": "Update with IPv4 and IPv6 specified in one request (A and AAAA records need to have the same update token):"
     },
     "error": {
         "net": {

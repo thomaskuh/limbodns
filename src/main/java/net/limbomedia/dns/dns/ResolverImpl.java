@@ -137,12 +137,12 @@ public class ResolverImpl implements Resolver {
     }
 
     private void addAdditional2(Message response, int section, int flags) {
-    	response.getSection(section).forEach(r -> {
+        response.getSection(section).forEach(r -> {
             Name glueName = r.getAdditionalName();
             if (glueName != null) {
                 addGlue(response, glueName, flags);
             }
-    	});
+        });
     }
 
     private final void addAdditional(Message response, int flags) {

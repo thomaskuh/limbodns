@@ -11,6 +11,7 @@ public class UpdateResult implements Serializable {
     private String type;
     private boolean changed;
     private String value;
+    private String error;
 
     public UpdateResult(String zone, String record, String type, boolean changed, String value) {
         this.zone = zone;
@@ -60,6 +61,14 @@ public class UpdateResult implements Serializable {
         return type;
     }
 
+    public void setError(String error) {
+        this.error = error;
+    }
+
+    public String getError() {
+        return error;
+    }
+
     @Override
     public String toString() {
         return "UpdateResult [zone="
@@ -72,6 +81,8 @@ public class UpdateResult implements Serializable {
                 + changed
                 + ", value="
                 + value
+                + ", error="
+                + error
                 + "]";
     }
 }

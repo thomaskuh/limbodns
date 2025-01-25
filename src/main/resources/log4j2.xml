@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
     <Appenders>
+		<!-- No exception stack logging by default. Enable using system property LOG_STACKS with values: -->
+		<!-- "short" = first line, "full" = full stack trace, 0-n = lines of stacktrace  -->
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{DEFAULT} [%-8.8t] %-5level %logger - %msg%n"/>
+            <PatternLayout pattern="%d{DEFAULT} [%-8.8t] %-5level %logger - %msg%n%ex{${env:LOG_STACKS:-0}}"/>
         </Console>
         <File name="File" fileName="${sys:envDataDir}/limbodns.log">
-            <PatternLayout pattern="%d{DEFAULT} [%-8.8t] %-5level %logger - %msg%n"/>
+            <PatternLayout pattern="%d{DEFAULT} [%-8.8t] %-5level %logger - %msg%n%ex{${env:LOG_STACKS:-0}}"/>
         </File>
     </Appenders>
     <Loggers>

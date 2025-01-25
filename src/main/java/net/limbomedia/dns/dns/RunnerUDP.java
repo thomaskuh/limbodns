@@ -52,7 +52,7 @@ public class RunnerUDP implements Runnable {
                     packet.getPort(),
                     e.getClass().getSimpleName(),
                     e.getMessage(),
-                    L.isDebugEnabled() ? e : null);
+                    e);
         }
     }
 }

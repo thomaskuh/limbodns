@@ -67,7 +67,7 @@ public class RunnerTCP implements Runnable {
                     socket.getPort(),
                     e.getClass().getSimpleName(),
                     e.getMessage(),
-                    L.isDebugEnabled() ? e : null);
+                    e);
         } finally {
             try {
                 socket.close();

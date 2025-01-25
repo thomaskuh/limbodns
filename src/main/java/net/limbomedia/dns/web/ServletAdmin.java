@@ -11,14 +11,13 @@ import net.limbomedia.dns.model.XRecord;
 import net.limbomedia.dns.model.XZone;
 import org.kuhlins.lib.webkit.HttpUtils;
 
-public class ServletApi extends ServletGeneric {
+public class ServletAdmin extends ServletGeneric {
 
-    private static final long serialVersionUID = 5944920558918363076L;
-
+    private static final long serialVersionUID = 1L;
     private Config config;
     private ZoneManager zoneManager;
 
-    public ServletApi(Config config, ZoneManager zoneManager) {
+    public ServletAdmin(Config config, ZoneManager zoneManager) {
         this.config = config;
         this.zoneManager = zoneManager;
         handlers.add(this::handleProbe);
@@ -44,7 +43,7 @@ public class ServletApi extends ServletGeneric {
             Pattern.compile("^/zone/([a-zA-Z0-9\\-\\.@]+)/record/([a-zA-Z0-9\\-]+)$");
 
     private boolean handleProbe(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Matcher matcher = PATTERN_PROBE.matcher(req.getPathInfo());
+        Matcher matcher = PATTERN_PROBE.matcher(path(req));
         if (!"GET".equals(req.getMethod()) || !matcher.matches()) {
             return false;
         }
@@ -53,7 +52,7 @@ public class ServletApi extends ServletGeneric {
     }
 
     private boolean handleZoneGets(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Matcher matcher = PATTERN_ZONE_GETS.matcher(req.getPathInfo());
+        Matcher matcher = PATTERN_ZONE_GETS.matcher(path(req));
         if (!"GET".equals(req.getMethod()) || !matcher.matches()) {
             return false;
         }
@@ -62,7 +61,7 @@ public class ServletApi extends ServletGeneric {
     }
 
     private boolean handleZoneGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Matcher matcher = PATTERN_ZONE_GET_UPDATE_DELETE.matcher(req.getPathInfo());
+        Matcher matcher = PATTERN_ZONE_GET_UPDATE_DELETE.matcher(path(req));
         if (!"GET".equals(req.getMethod()) || !matcher.matches()) {
             return false;
         }
@@ -71,7 +70,7 @@ public class ServletApi extends ServletGeneric {
     }
 
     private boolean handleZoneDelete(HttpServletRequest req, HttpServletResponse resp) {
-        Matcher matcher = PATTERN_ZONE_GET_UPDATE_DELETE.matcher(req.getPathInfo());
+        Matcher matcher = PATTERN_ZONE_GET_UPDATE_DELETE.matcher(path(req));
         if (!"DELETE".equals(req.getMethod()) || !matcher.matches()) {
             return false;
         }
@@ -80,7 +79,7 @@ public class ServletApi extends ServletGeneric {
     }
 
     private boolean handleZoneCreate(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Matcher matcher = PATTERN_ZONE_CREATE.matcher(req.getPathInfo());
+        Matcher matcher = PATTERN_ZONE_CREATE.matcher(path(req));
         if (!"POST".equals(req.getMethod()) || !matcher.matches()) {
             return false;
         }
@@ -92,7 +91,7 @@ public class ServletApi extends ServletGeneric {
     }
 
     private boolean handleRecordGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Matcher matcher = PATTERN_RECORD_GET_UPDATE_DELETE.matcher(req.getPathInfo());
+        Matcher matcher = PATTERN_RECORD_GET_UPDATE_DELETE.matcher(path(req));
         if (!"GET".equals(req.getMethod()) || !matcher.matches()) {
             return false;
         }
@@ -102,7 +101,7 @@ public class ServletApi extends ServletGeneric {
     }
 
     private boolean handleRecordCreate(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Matcher matcher = PATTERN_RECORD_CREATE.matcher(req.getPathInfo());
+        Matcher matcher = PATTERN_RECORD_CREATE.matcher(path(req));
         if (!"POST".equals(req.getMethod()) || !matcher.matches()) {
             return false;
         }
@@ -115,7 +114,7 @@ public class ServletApi extends ServletGeneric {
     }
 
     private boolean handleRecordDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Matcher matcher = PATTERN_RECORD_GET_UPDATE_DELETE.matcher(req.getPathInfo());
+        Matcher matcher = PATTERN_RECORD_GET_UPDATE_DELETE.matcher(path(req));
         if (!"DELETE".equals(req.getMethod()) || !matcher.matches()) {
             return false;
         }
@@ -125,7 +124,7 @@ public class ServletApi extends ServletGeneric {
     }
 
     private boolean handleRecordUpdate(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Matcher matcher = PATTERN_RECORD_GET_UPDATE_DELETE.matcher(req.getPathInfo());
+        Matcher matcher = PATTERN_RECORD_GET_UPDATE_DELETE.matcher(path(req));
         if (!"POST".equals(req.getMethod()) || !matcher.matches()) {
             return false;
         }

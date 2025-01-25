@@ -47,9 +47,11 @@ public class WebServer {
         // Own servlets
         ServletHandler handlerServlets = new ServletHandler();
         handlerServlets.setEnsureDefaultServlet(false);
-        handlerServlets.addServletWithMapping(new ServletHolder(new ServletApi(config, zoneManager)), "/api/*");
+        handlerServlets.addFilterWithMapping(new FilterHolder(new SecurityFilter(config.getPassword())), "/admin/*", 0);
+        handlerServlets.addServletWithMapping(new ServletHolder(new ServletAdmin(config, zoneManager)), "/admin/*");
+        handlerServlets.addServletWithMapping(
+                new ServletHolder(new ServletApiSimple(config, zoneManager)), "/api/simple/*");
         handlerServlets.addServletWithMapping(new ServletHolder(new UpdateServlet(config, zoneManager)), "/update/*");
-        handlerServlets.addFilterWithMapping(new FilterHolder(new SecurityFilter(config.getPassword())), "/api/*", 0);
 
         ServletContextHandler handlerServletsWithContext = new ServletContextHandler("/", false, false);
         handlerServletsWithContext.setHandler(handlerServlets);

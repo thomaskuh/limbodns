@@ -35,11 +35,7 @@ public class MonitorTCP extends Monitor {
                 accept.setSoTimeout(timeoutMs);
                 executorService.execute(new RunnerTCP(resolver, accept, log));
             } catch (Exception e) {
-                L.warn(
-                        "TCP Socket error: {} -> {}.",
-                        e.getClass().getSimpleName(),
-                        e.getMessage(),
-                        L.isDebugEnabled() ? e : null);
+                L.warn("TCP Socket error: {} -> {}.", e.getClass().getSimpleName(), e.getMessage(), e);
             }
         }
 

@@ -33,20 +33,33 @@ public class LimboDNS {
             this.persistence = new PersistenceImpl(dataDirectory, Defaults::config, Defaults::zones);
             this.config = this.persistence.configLoad();
         } catch (IOException | IllegalArgumentException e) {
-            L.error("Failed to start LimboDNS. {}.", e.getMessage(), e);
+            L.error("Failed to start LimboDNS. {} -> {}.", e.getClass().getSimpleName(), e.getMessage(), e);
             System.exit(-1);
         }
 
         try {
             zoneManager = new ZoneManagerImpl(this.persistence, config.isLogUpdate());
         } catch (IOException e) {
-            L.error("Failed to start LimboDNS. Cannot initialize ZoneManager. {}.", e.getMessage(), e);
+            L.error(
+                    "Failed to start LimboDNS. Cannot initialize ZoneManager. {} -> {}.",
+                    e.getClass().getSimpleName(),
+                    e.getMessage(),
+                    e);
             System.exit(-1);
         }
 
-        resolver = new ResolverImpl(zoneManager);
-        dns = new DNServer(config, resolver);
-        webServer = new WebServer(config, zoneManager);
+        try {
+            resolver = new ResolverImpl(zoneManager);
+            dns = new DNServer(config, resolver);
+            webServer = new WebServer(config, zoneManager);
+        } catch (Exception e) {
+            L.error(
+                    "Failed to start LimboDNS. Cannot start Servers. {} -> {}.",
+                    e.getClass().getSimpleName(),
+                    e.getMessage(),
+                    e);
+            System.exit(-1);
+        }
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
