@@ -137,13 +137,12 @@ public class ResolverImpl implements Resolver {
     }
 
     private void addAdditional2(Message response, int section, int flags) {
-        Record[] records = response.getSectionArray(section);
-        for (Record r : records) {
+    	response.getSection(section).forEach(r -> {
             Name glueName = r.getAdditionalName();
             if (glueName != null) {
                 addGlue(response, glueName, flags);
             }
-        }
+    	});
     }
 
     private final void addAdditional(Message response, int flags) {
@@ -256,7 +255,7 @@ public class ResolverImpl implements Resolver {
         TSIG tsig = null;
         if (queryTSIG != null) {
             tsig = TSIGs.get(queryTSIG.getName());
-            if (tsig == null || tsig.verify(query, in, length, null) != Rcode.NOERROR) {
+            if (tsig == null || tsig.verify(query, in, null) != Rcode.NOERROR) {
                 return formerrMessage(in);
             }
         }
