@@ -114,7 +114,13 @@ HTTPREQ_PASSWORD=secrettoken <-- This is the token defined above in LimboDNS
       - traefik.http.routers.myservice-https.tls.certresolver=ledns
       - traefik.http.routers.myservice-https.tls.domains[0].main=*.example.com
       - traefik.http.routers.myservice-https.tls.domains[0].sans=example.com
+      
+# Here's the curl equivalent traefik will then send to LimboDNS:
+curl --request POST --header 'Content-Type: application/json' --header 'Authorization: Basic dG9rZW46c2VjcmV0dG9rZW4=' --data '{"fqdn":"_acme-challenge.example.com","value":"RandomChallengeString"}' https://your.limbodns.domain/api/lego/present
+
 ```
+
+
 
 
 
