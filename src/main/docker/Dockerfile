@@ -1,7 +1,7 @@
-FROM alpine:3.20
+FROM alpine:3.24
 MAINTAINER LimboMedia <admin@limbomedia.net>
 
-RUN apk add --update --no-cache openjdk21-jre-headless
+RUN apk add --update --no-cache openjdk25-jre-headless
 
 ADD maven/limbodns-jar-with-dependencies.jar /limbodns.jar
 RUN mkdir data

@@ -1,7 +1,7 @@
 pipeline {
     agent any
     tools {
-        jdk "jdk-21"
+        jdk "jdk-25"
         maven "maven-3.9"
     }
     triggers {
@@ -39,7 +39,7 @@ pipeline {
         	when {expression { !params.RELEASE }}        
             steps {
                 echo "=== Stage: Snapshot (Build & Deploy) ==="
-                sh 'mvn clean deploy docker:build docker:push -Ddkr.tag=snapshot'
+                sh 'mvn -U clean deploy docker:build docker:push -Ddkr.tag=snapshot'
             }
         }
         stage('Release') {
